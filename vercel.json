@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/daily-subscriptions",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 9 * * 0"
+    },
+    {
+      "path": "/api/cron/monthly-report",
+      "schedule": "0 9 1 * *"
     }
   ]
 }

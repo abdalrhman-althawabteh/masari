@@ -320,6 +320,44 @@ export type Database = {
           }
         ];
       };
+      reports_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: string;
+          sent_at: string;
+          email_subject: string;
+          status: string;
+          error_message: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: string;
+          sent_at?: string;
+          email_subject: string;
+          status?: string;
+          error_message?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: string;
+          sent_at?: string;
+          email_subject?: string;
+          status?: string;
+          error_message?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reports_log_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -334,3 +372,4 @@ export type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 export type Budget = Database["public"]["Tables"]["budgets"]["Row"];
 export type AICategoryOverride = Database["public"]["Tables"]["ai_category_overrides"]["Row"];
+export type ReportLog = Database["public"]["Tables"]["reports_log"]["Row"];
