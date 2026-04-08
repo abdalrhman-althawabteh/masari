@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { setWebhook } from "@/lib/telegram/bot";
 
-export async function POST() {
+async function registerWebhook() {
   const appUrl = process.env.APP_URL;
 
   if (!appUrl) {
@@ -12,4 +12,14 @@ export async function POST() {
   const result = await setWebhook(webhookUrl);
 
   return NextResponse.json({ webhookUrl, result });
+}
+
+// GET so you can just visit the URL in a browser
+export async function GET() {
+  return registerWebhook();
+}
+
+// POST for programmatic use
+export async function POST() {
+  return registerWebhook();
 }

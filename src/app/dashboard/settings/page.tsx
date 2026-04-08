@@ -247,7 +247,7 @@ export default function SettingsPage() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Open <a href="https://t.me/masari_money_bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@masari_money_bot</a> on Telegram and send the code above.
+                  Open <a href="https://t.me/masaribot_bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@masaribot_bot</a> on Telegram and send the code above.
                 </p>
               </div>
             ) : (

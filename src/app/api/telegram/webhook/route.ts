@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendMessage, getFileUrl, downloadFileAsBase64, type TelegramUpdate } from "@/lib/telegram/bot";
+import { sendMessage, getFileUrl, downloadFileAsBase64, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
 import { parseMessage, parseReceipt } from "@/lib/telegram/parse";
 import { getApiKey, type AIProvider } from "@/lib/ai/provider";
 import { formatCurrency, type Currency } from "@/lib/currency";
@@ -306,4 +306,20 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ ok: true });
+}
+
+// GET handler: auto-registers the webhook with Telegram
+export async function GET() {
+  const appUrl = process.env.APP_URL;
+  if (!appUrl) {
+    return NextResponse.json({ error: "APP_URL not set" }, { status: 500 });
+  }
+
+  const webhookUrl = `${appUrl}/api/telegram/webhook`;
+  const result = await setWebhook(webhookUrl);
+  return NextResponse.json({
+    message: "Webhook registered",
+    webhookUrl,
+    result,
+  });
 }
