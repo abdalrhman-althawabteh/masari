@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Eye, EyeOff, MessageCircle, Copy, Unlink, Loader2 } from "lucide-react";
+import { Sparkles, Eye, EyeOff, MessageCircle, Copy, Unlink, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -332,6 +332,29 @@ export default function SettingsPage() {
                 placeholder="e.g. Asia/Amman"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Data */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Data
+            </CardTitle>
+            <CardDescription>Export your transaction data</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.open("/api/export/csv", "_blank");
+              }}
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Export Transactions as CSV
+            </Button>
           </CardContent>
         </Card>
 

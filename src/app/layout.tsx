@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Masari — مصاري",
   description: "Your AI-powered personal accountant",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

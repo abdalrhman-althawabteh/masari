@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, Target } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, Target, PiggyBank } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ const navItems = [
   { label: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight },
   { label: "Subscriptions", href: "/dashboard/subscriptions", icon: CalendarDays },
   { label: "Budgets", href: "/dashboard/budgets", icon: Target },
+  { label: "Savings", href: "/dashboard/savings", icon: PiggyBank },
   { label: "Categories", href: "/dashboard/categories", icon: Tags },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

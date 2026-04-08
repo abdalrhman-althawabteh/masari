@@ -358,6 +358,98 @@ export type Database = {
           }
         ];
       };
+      savings_goals: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          target_amount: number;
+          target_currency: string;
+          current_amount: number;
+          deadline: string | null;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          target_amount: number;
+          target_currency?: string;
+          current_amount?: number;
+          deadline?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          target_amount?: number;
+          target_currency?: string;
+          current_amount?: number;
+          deadline?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "savings_goals_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      savings_contributions: {
+        Row: {
+          id: string;
+          user_id: string;
+          goal_id: string;
+          amount: number;
+          currency: string;
+          date: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          goal_id: string;
+          amount: number;
+          currency?: string;
+          date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          goal_id?: string;
+          amount?: number;
+          currency?: string;
+          date?: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "savings_contributions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "savings_contributions_goal_id_fkey";
+            columns: ["goal_id"];
+            isOneToOne: false;
+            referencedRelation: "savings_goals";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -373,3 +465,5 @@ export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 export type Budget = Database["public"]["Tables"]["budgets"]["Row"];
 export type AICategoryOverride = Database["public"]["Tables"]["ai_category_overrides"]["Row"];
 export type ReportLog = Database["public"]["Tables"]["reports_log"]["Row"];
+export type SavingsGoal = Database["public"]["Tables"]["savings_goals"]["Row"];
+export type SavingsContribution = Database["public"]["Tables"]["savings_contributions"]["Row"];
