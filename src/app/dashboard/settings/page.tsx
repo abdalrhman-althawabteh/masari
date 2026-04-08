@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Sparkles, Eye, EyeOff } from "lucide-react";
+import { Sparkles, Eye, EyeOff, MessageCircle, Copy, Unlink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,9 @@ export default function SettingsPage() {
   const [anthropicKey, setAnthropicKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
+  const [telegramLinked, setTelegramLinked] = useState(false);
+  const [telegramCode, setTelegramCode] = useState<string | null>(null);
+  const [telegramLoading, setTelegramLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -46,6 +49,7 @@ export default function SettingsPage() {
         setOpenaiKey(data.openai_api_key || "");
         setAnthropicKey(data.anthropic_api_key || "");
         setGeminiKey(data.gemini_api_key || "");
+        setTelegramLinked(!!data.telegram_chat_id);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -185,6 +189,88 @@ export default function SettingsPage() {
                 Your API key is stored securely and used for AI features like auto-categorization and &quot;Can I Spend This?&quot;
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Telegram */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageCircle className="h-4 w-4 text-[#0088cc]" />
+              Telegram Bot
+            </CardTitle>
+            <CardDescription>
+              Link your Telegram account to log transactions via chat
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {telegramLinked ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-[var(--income)]" />
+                  <span className="text-sm font-medium">Telegram linked</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Send messages to your bot to log expenses, income, or scan receipts.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    setTelegramLoading(true);
+                    const res = await fetch("/api/telegram/unlink", { method: "POST" });
+                    if (res.ok) {
+                      setTelegramLinked(false);
+                      setTelegramCode(null);
+                    }
+                    setTelegramLoading(false);
+                  }}
+                  disabled={telegramLoading}
+                >
+                  <Unlink className="h-3.5 w-3.5 mr-1" />
+                  Unlink Telegram
+                </Button>
+              </div>
+            ) : telegramCode ? (
+              <div className="space-y-3">
+                <p className="text-sm">Send this code to your Masari bot on Telegram:</p>
+                <div className="flex items-center gap-2">
+                  <code className="bg-accent px-4 py-2 rounded-lg text-2xl font-mono font-bold tracking-widest">
+                    {telegramCode}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigator.clipboard.writeText(telegramCode)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Open <a href="https://t.me/masari_money_bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">@masari_money_bot</a> on Telegram and send the code above.
+                </p>
+              </div>
+            ) : (
+              <Button
+                onClick={async () => {
+                  setTelegramLoading(true);
+                  const res = await fetch("/api/telegram/link", { method: "POST" });
+                  if (res.ok) {
+                    const { code } = await res.json();
+                    setTelegramCode(code);
+                  }
+                  setTelegramLoading(false);
+                }}
+                disabled={telegramLoading}
+                size="sm"
+              >
+                {telegramLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-1" /> Generating...</>
+                ) : (
+                  <><MessageCircle className="h-4 w-4 mr-1" /> Link Telegram</>
+                )}
+              </Button>
+            )}
           </CardContent>
         </Card>
 
