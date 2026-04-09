@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Skeleton } from "@/components/ui/skeleton";
 import { Topbar } from "@/components/layout/topbar";
 import { SubscriptionForm } from "@/components/subscriptions/subscription-form";
-import { formatCurrency, type Currency } from "@/lib/currency";
+import { formatCurrency, convertCurrency, type Currency } from "@/lib/currency";
 import type { SubscriptionInput } from "@/lib/validations/subscription";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,8 @@ export default function SubscriptionsPage() {
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<SubscriptionWithCategory | undefined>();
+  const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
+  const [exchangeRate, setExchangeRate] = useState(0.709);
 
   const fetchSubscriptions = useCallback(async () => {
     const res = await fetch("/api/subscriptions");
@@ -49,6 +51,13 @@ export default function SubscriptionsPage() {
 
   useEffect(() => {
     fetchSubscriptions();
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((profile) => {
+        if (profile.default_currency) setDefaultCurrency(profile.default_currency as Currency);
+        if (profile.exchange_rate) setExchangeRate(profile.exchange_rate);
+      })
+      .catch(() => {});
   }, [fetchSubscriptions]);
 
   const activeSubs = subscriptions.filter((s) => s.status === "active");
@@ -59,6 +68,8 @@ export default function SubscriptionsPage() {
     let monthly = s.amount;
     if (s.billing_cycle === "yearly") monthly = s.amount / 12;
     if (s.billing_cycle === "weekly") monthly = s.amount * 4.33;
+    // Convert to default currency
+    monthly = convertCurrency(monthly, s.currency as Currency, defaultCurrency, exchangeRate);
     return sum + monthly;
   }, 0);
 
@@ -160,7 +171,7 @@ export default function SubscriptionsPage() {
                 </div>
               </div>
               <p className="text-2xl font-bold mt-2 text-[var(--warning)]">
-                {formatCurrency(monthlyTotal, "USD")}
+                {formatCurrency(monthlyTotal, defaultCurrency)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">per month</p>
             </CardContent>
@@ -174,7 +185,7 @@ export default function SubscriptionsPage() {
                 </div>
               </div>
               <p className="text-2xl font-bold mt-2 text-[var(--expense)]">
-                {formatCurrency(yearlyTotal, "USD")}
+                {formatCurrency(yearlyTotal, defaultCurrency)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">per year</p>
             </CardContent>
