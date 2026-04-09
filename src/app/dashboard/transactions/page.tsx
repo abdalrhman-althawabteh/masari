@@ -189,7 +189,7 @@ export default function TransactionsPage() {
                         {t.type === "income" ? "+" : "-"}
                         {formatCurrency(t.amount, t.currency)}
                       </span>
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-0.5">
                         <Button
                           variant="ghost"
                           size="icon"
