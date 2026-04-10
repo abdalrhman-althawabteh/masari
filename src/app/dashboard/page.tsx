@@ -10,6 +10,7 @@ import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { CategoryBreakdown } from "@/components/dashboard/category-breakdown";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CanISpend } from "@/components/dashboard/can-i-spend";
+import { Onboarding } from "@/components/dashboard/onboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -53,19 +54,41 @@ interface DashboardData {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  useEffect(() => {
+  function fetchData() {
     fetch("/api/dashboard/summary")
       .then((res) => res.json())
       .then((json) => {
         setData(json);
+        // Show onboarding if user has zero transactions and no income/expenses
+        if (
+          json.income === 0 &&
+          json.expenses === 0 &&
+          json.recentTransactions.length === 0 &&
+          !localStorage.getItem("masari_onboarding_done")
+        ) {
+          setShowOnboarding(true);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleOnboardingComplete() {
+    localStorage.setItem("masari_onboarding_done", "true");
+    setShowOnboarding(false);
+    fetchData(); // Refresh dashboard data
+  }
 
   return (
     <>
+      {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
       <Topbar title="Dashboard" />
 
       <div className="p-4 lg:p-6 space-y-6">
