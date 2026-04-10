@@ -1,8 +1,13 @@
+import dynamic from "next/dynamic";
 import { Sidebar } from "@/components/layout/sidebar";
 import { FloatingAdd } from "@/components/layout/floating-add";
-import { CommandSearch } from "@/components/layout/command-search";
 
-export const dynamic = "force-dynamic";
+const CommandSearch = dynamic(
+  () => import("@/components/layout/command-search").then((m) => m.CommandSearch),
+  { ssr: false }
+);
+
+export const forceDynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,

@@ -2,27 +2,20 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
-  CommandDialog,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-} from "@/components/ui/command";
-import {
+  Search,
   ArrowLeftRight,
   CalendarDays,
   Handshake,
   PiggyBank,
-  Plus,
   Settings,
   LayoutDashboard,
   Target,
   Tags,
 } from "lucide-react";
 import { formatCurrency, type Currency } from "@/lib/currency";
+import { cn } from "@/lib/utils";
 
 interface SearchResults {
   transactions: Array<{
@@ -57,15 +50,26 @@ interface SearchResults {
   }>;
 }
 
+const quickActions = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/transactions" },
+  { icon: CalendarDays, label: "Subscriptions", href: "/dashboard/subscriptions" },
+  { icon: Target, label: "Budgets", href: "/dashboard/budgets" },
+  { icon: PiggyBank, label: "Savings Goals", href: "/dashboard/savings" },
+  { icon: Handshake, label: "Debts", href: "/dashboard/debts" },
+  { icon: Tags, label: "Categories", href: "/dashboard/categories" },
+  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+];
+
 export function CommandSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
   const [searching, setSearching] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Cmd+K / Ctrl+K to open
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -77,6 +81,15 @@ export function CommandSearch() {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    } else {
+      setQuery("");
+      setResults(null);
+    }
+  }, [open]);
+
   const search = useCallback(async (q: string) => {
     if (q.length < 2) {
       setResults(null);
@@ -86,9 +99,7 @@ export function CommandSearch() {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       if (res.ok) setResults(await res.json());
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
     setSearching(false);
   }, []);
 
@@ -100,8 +111,6 @@ export function CommandSearch() {
 
   function navigate(path: string) {
     setOpen(false);
-    setQuery("");
-    setResults(null);
     router.push(path);
   }
 
@@ -113,126 +122,123 @@ export function CommandSearch() {
   );
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} title="Search" description="Search across your finances">
-      <CommandInput
-        placeholder="Search transactions, subscriptions, debts..."
-        value={query}
-        onValueChange={setQuery}
-      />
-      <CommandList>
-        {query.length < 2 ? (
-          <>
-            {/* Quick actions when no search */}
-            <CommandGroup heading="Quick Actions">
-              <CommandItem onSelect={() => navigate("/dashboard")}>
-                <LayoutDashboard className="mr-2 h-4 w-4 text-muted-foreground" />
-                Dashboard
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/transactions")}>
-                <ArrowLeftRight className="mr-2 h-4 w-4 text-muted-foreground" />
-                Transactions
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/subscriptions")}>
-                <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
-                Subscriptions
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/budgets")}>
-                <Target className="mr-2 h-4 w-4 text-muted-foreground" />
-                Budgets
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/savings")}>
-                <PiggyBank className="mr-2 h-4 w-4 text-muted-foreground" />
-                Savings Goals
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/debts")}>
-                <Handshake className="mr-2 h-4 w-4 text-muted-foreground" />
-                Debts
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/categories")}>
-                <Tags className="mr-2 h-4 w-4 text-muted-foreground" />
-                Categories
-              </CommandItem>
-              <CommandItem onSelect={() => navigate("/dashboard/settings")}>
-                <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
-                Settings
-              </CommandItem>
-            </CommandGroup>
-          </>
-        ) : searching ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">Searching...</div>
-        ) : !hasResults ? (
-          <CommandEmpty>No results found.</CommandEmpty>
-        ) : (
-          <>
-            {results!.transactions.length > 0 && (
-              <CommandGroup heading="Transactions">
-                {results!.transactions.map((tx) => (
-                  <CommandItem key={tx.id} onSelect={() => navigate("/dashboard/transactions")}>
-                    <span className="mr-2">{tx.categories?.icon || "📁"}</span>
-                    <span className="flex-1 truncate">{tx.description}</span>
-                    <span className={`text-xs font-medium ${tx.type === "income" ? "text-[var(--income)]" : "text-[var(--expense)]"}`}>
-                      {tx.type === "income" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency as Currency)}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="p-0 gap-0 max-w-lg" showCloseButton={false}>
+        <DialogTitle className="sr-only">Search</DialogTitle>
 
-            {results!.subscriptions.length > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup heading="Subscriptions">
-                  {results!.subscriptions.map((sub) => (
-                    <CommandItem key={sub.id} onSelect={() => navigate("/dashboard/subscriptions")}>
-                      <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span className="flex-1 truncate">{sub.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatCurrency(sub.amount, sub.currency as Currency)}
+        {/* Search input */}
+        <div className="flex items-center gap-3 px-4 border-b border-border">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search transactions, subscriptions, debts..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 h-12 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          <kbd className="px-1.5 py-0.5 rounded bg-accent text-[10px] font-mono text-muted-foreground">ESC</kbd>
+        </div>
+
+        {/* Results */}
+        <div className="max-h-80 overflow-y-auto p-2">
+          {query.length < 2 ? (
+            <div>
+              <p className="px-3 py-1.5 text-xs font-medium text-muted-foreground">Navigate</p>
+              {quickActions.map((action) => (
+                <button
+                  key={action.href}
+                  onClick={() => navigate(action.href)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <action.icon className="h-4 w-4" />
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          ) : searching ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">Searching...</p>
+          ) : !hasResults ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">No results found for &quot;{query}&quot;</p>
+          ) : (
+            <div className="space-y-1">
+              {results!.transactions.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-xs font-medium text-muted-foreground">Transactions</p>
+                  {results!.transactions.map((tx) => (
+                    <button
+                      key={tx.id}
+                      onClick={() => navigate("/dashboard/transactions")}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors"
+                    >
+                      <span>{tx.categories?.icon || "📁"}</span>
+                      <span className="flex-1 text-left truncate">{tx.description}</span>
+                      <span className={cn("text-xs font-medium", tx.type === "income" ? "text-[var(--income)]" : "text-[var(--expense)]")}>
+                        {tx.type === "income" ? "+" : "-"}{formatCurrency(tx.amount, tx.currency as Currency)}
                       </span>
-                    </CommandItem>
+                    </button>
                   ))}
-                </CommandGroup>
-              </>
-            )}
+                </div>
+              )}
 
-            {results!.debts.length > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup heading="Debts">
+              {results!.subscriptions.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-xs font-medium text-muted-foreground">Subscriptions</p>
+                  {results!.subscriptions.map((sub) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => navigate("/dashboard/subscriptions")}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors"
+                    >
+                      <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-left truncate">{sub.name}</span>
+                      <span className="text-xs text-muted-foreground">{formatCurrency(sub.amount, sub.currency as Currency)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {results!.debts.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-xs font-medium text-muted-foreground">Debts</p>
                   {results!.debts.map((debt) => (
-                    <CommandItem key={debt.id} onSelect={() => navigate("/dashboard/debts")}>
-                      <Handshake className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span className="flex-1 truncate">
+                    <button
+                      key={debt.id}
+                      onClick={() => navigate("/dashboard/debts")}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors"
+                    >
+                      <Handshake className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-left truncate">
                         {debt.direction === "i_owe" ? `I owe ${debt.person_name}` : `${debt.person_name} owes me`}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatCurrency(debt.amount, debt.currency as Currency)}
-                      </span>
-                    </CommandItem>
+                      <span className="text-xs text-muted-foreground">{formatCurrency(debt.amount, debt.currency as Currency)}</span>
+                    </button>
                   ))}
-                </CommandGroup>
-              </>
-            )}
+                </div>
+              )}
 
-            {results!.savings.length > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup heading="Savings Goals">
+              {results!.savings.length > 0 && (
+                <div>
+                  <p className="px-3 py-1.5 text-xs font-medium text-muted-foreground">Savings Goals</p>
                   {results!.savings.map((goal) => (
-                    <CommandItem key={goal.id} onSelect={() => navigate("/dashboard/savings")}>
-                      <PiggyBank className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span className="flex-1 truncate">{goal.name}</span>
+                    <button
+                      key={goal.id}
+                      onClick={() => navigate("/dashboard/savings")}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-accent transition-colors"
+                    >
+                      <PiggyBank className="h-4 w-4 text-muted-foreground" />
+                      <span className="flex-1 text-left truncate">{goal.name}</span>
                       <span className="text-xs text-muted-foreground">
                         {Math.round((goal.current_amount / goal.target_amount) * 100)}%
                       </span>
-                    </CommandItem>
+                    </button>
                   ))}
-                </CommandGroup>
-              </>
-            )}
-          </>
-        )}
-      </CommandList>
-    </CommandDialog>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
