@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, Target, PiggyBank, Handshake } from "lucide-react";
@@ -9,34 +9,20 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: null as string | null },
-  { label: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight, badge: null },
-  { label: "Subscriptions", href: "/dashboard/subscriptions", icon: CalendarDays, badge: "subs" },
-  { label: "Budgets", href: "/dashboard/budgets", icon: Target, badge: null },
-  { label: "Savings", href: "/dashboard/savings", icon: PiggyBank, badge: null },
-  { label: "Debts", href: "/dashboard/debts", icon: Handshake, badge: "debts" },
-  { label: "Categories", href: "/dashboard/categories", icon: Tags, badge: null },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings, badge: null },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight },
+  { label: "Subscriptions", href: "/dashboard/subscriptions", icon: CalendarDays },
+  { label: "Budgets", href: "/dashboard/budgets", icon: Target },
+  { label: "Savings", href: "/dashboard/savings", icon: PiggyBank },
+  { label: "Debts", href: "/dashboard/debts", icon: Handshake },
+  { label: "Categories", href: "/dashboard/categories", icon: Tags },
+  { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const [notifs, setNotifs] = useState({ overdueDebts: 0, upcomingSubs: 0 });
-
-  useEffect(() => {
-    fetch("/api/notifications")
-      .then((r) => r.json())
-      .then((data) => setNotifs(data))
-      .catch(() => {});
-  }, [pathname]);
-
-  function getBadgeCount(badge: string | null): number {
-    if (badge === "debts") return notifs.overdueDebts;
-    if (badge === "subs") return notifs.upcomingSubs;
-    return 0;
-  }
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -48,13 +34,9 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className="lg:hidden inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors relative"
+        className="lg:hidden inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
       >
         <Menu className="h-5 w-5" />
-        {/* Show a dot on hamburger if there are notifications */}
-        {(notifs.overdueDebts > 0 || notifs.upcomingSubs > 0) && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--expense)]" />
-        )}
       </SheetTrigger>
       <SheetContent side="left" className="w-64 bg-sidebar p-0 flex flex-col">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
@@ -71,7 +53,6 @@ export function MobileNav() {
               item.href === "/dashboard"
                 ? pathname === "/dashboard"
                 : pathname.startsWith(item.href);
-            const count = getBadgeCount(item.badge);
             return (
               <Link
                 key={item.href}
@@ -86,16 +67,6 @@ export function MobileNav() {
               >
                 <item.icon className="h-5 w-5" />
                 {item.label}
-                {count > 0 && !isActive && (
-                  <span className={cn(
-                    "ml-auto text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full",
-                    item.badge === "debts"
-                      ? "bg-[var(--expense)] text-white"
-                      : "bg-[var(--warning)] text-black"
-                  )}>
-                    {count}
-                  </span>
-                )}
               </Link>
             );
           })}
