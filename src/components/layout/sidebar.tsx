@@ -6,6 +6,7 @@ import { LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { UserProfile } from "./user-avatar";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -62,7 +63,10 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-2">
+        <div className="px-3 py-2">
+          <UserProfile />
+        </div>
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent w-full transition-colors"

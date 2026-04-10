@@ -7,6 +7,7 @@ import { Menu, LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, Calendar
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { UserProfile } from "./user-avatar";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -72,7 +73,10 @@ export function MobileNav() {
           })}
         </nav>
 
-        <div className="p-3 shrink-0 border-t border-border">
+        <div className="p-3 shrink-0 border-t border-border space-y-2">
+          <div className="px-3 py-2">
+            <UserProfile compact />
+          </div>
           <button
             onClick={handleSignOut}
             className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent w-full transition-colors min-h-[44px]"
