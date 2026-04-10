@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendMessage, getFileUrl, downloadFileAsBase64, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
-import { parseMessage, parseReceipt, type ParsedQuery } from "@/lib/telegram/parse";
+import { parseMessage, parseReceipt, fuzzyMatch, type ParsedQuery } from "@/lib/telegram/parse";
 import { getApiKey, type AIProvider } from "@/lib/ai/provider";
 import { formatCurrency, convertCurrency, type Currency } from "@/lib/currency";
 import { startOfMonth, endOfMonth, format, addDays, addMonths } from "date-fns";
@@ -178,8 +178,16 @@ export async function POST(request: Request) {
         await handleCancelSubscription(supabase, chatId, profile, parsed);
         break;
 
+      case "edit_subscription":
+        await handleEditSubscription(supabase, chatId, profile, parsed);
+        break;
+
       case "set_budget":
         await handleSetBudget(supabase, chatId, profile, parsed);
+        break;
+
+      case "edit_budget":
+        await handleEditBudget(supabase, chatId, profile, parsed, toDefault);
         break;
 
       case "check_budget":
@@ -188,6 +196,10 @@ export async function POST(request: Request) {
 
       case "create_savings_goal":
         await handleCreateSavingsGoal(supabase, chatId, profile, parsed);
+        break;
+
+      case "edit_savings_goal":
+        await handleEditSavingsGoal(supabase, chatId, profile, parsed);
         break;
 
       case "contribute_savings":
@@ -200,6 +212,10 @@ export async function POST(request: Request) {
 
       case "create_debt":
         await handleCreateDebt(supabase, chatId, profile, parsed);
+        break;
+
+      case "edit_debt":
+        await handleEditDebt(supabase, chatId, profile, parsed);
         break;
 
       case "list_debts":
@@ -256,25 +272,31 @@ function getHelpText(name: string): string {
 - Send a <b>receipt photo</b>
 
 <b>Subscriptions</b>
-- <i>Add subscription Netflix $15 monthly</i>
+- <i>Add subscription Netflix $15 monthly starting May 1st</i>
 - <i>Show my subscriptions</i>
+- <i>Edit Netflix billing date to June 1st</i>
 - <i>Cancel Netflix</i>
 
 <b>Budgets</b>
 - <i>Set budget 500 JOD</i>
 - <i>Set food budget 200 JOD</i>
+- <i>Change budget to 600</i>
 - <i>How's my budget?</i>
 
 <b>Savings</b>
 - <i>Create savings goal Emergency Fund 5000 USD</i>
 - <i>Add 200 to Emergency Fund</i>
+- <i>Edit Emergency Fund target to 8000</i>
 - <i>How are my savings?</i>
 
 <b>Debts</b>
-- <i>I owe Ahmed 50 JOD for dinner</i>
+- <i>I owe Ahmed 50 JOD for dinner, due May 15th</i>
 - <i>Ahmed owes me 100 USD</i>
+- <i>Edit Ahmed's debt to 80 JOD</i>
 - <i>Show my debts</i>
-- <i>I paid Ahmed</i>`;
+- <i>I paid Ahmed</i>
+
+I understand both Arabic and English!`;
 }
 
 // ============ INTENT HANDLERS ============
@@ -353,7 +375,7 @@ async function handleCreateSubscription(supabase: SupabaseClient, chatId: string
   const category = await findCategory(supabase, profile.id, sub.category_hint || "SaaS", "expense");
   if (!category) { await sendMessage(chatId, "No categories found."); return; }
 
-  const nextDate = format(addMonths(new Date(), 1), "yyyy-MM-dd");
+  const nextDate = sub.start_date || format(addMonths(new Date(), 1), "yyyy-MM-dd");
 
   const { error } = await supabase.from("subscriptions").insert({
     user_id: profile.id, name: sub.name, amount: sub.amount, currency: sub.currency,
@@ -384,12 +406,13 @@ async function handleCancelSubscription(supabase: SupabaseClient, chatId: string
   const name = parsed.cancel_sub?.name;
   if (!name) { await sendMessage(chatId, "Which subscription? Try: <i>Cancel Netflix</i>"); return; }
 
-  const { data: subs } = await supabase
+  const { data: allSubs } = await supabase
     .from("subscriptions").select("id, name")
-    .eq("user_id", profile.id).eq("status", "active")
-    .ilike("name", `%${name}%`);
+    .eq("user_id", profile.id).eq("status", "active");
 
-  if (!subs || subs.length === 0) { await sendMessage(chatId, `No active subscription matching "${name}".`); return; }
+  const match = fuzzyMatch(allSubs || [], name);
+  if (!match) { await sendMessage(chatId, `No active subscription matching "${name}".`); return; }
+  const subs = [match];
 
   await supabase.from("subscriptions").update({ status: "cancelled" }).eq("id", subs[0].id);
   await sendMessage(chatId, `<b>${subs[0].name}</b> cancelled.`);
@@ -474,12 +497,13 @@ async function handleContributeSavings(supabase: SupabaseClient, chatId: string,
   const contrib = parsed.contribution;
   if (!contrib) { await sendMessage(chatId, "Try: <i>Add 200 to Emergency Fund</i>"); return; }
 
-  const { data: goals } = await supabase.from("savings_goals").select("id, name, current_amount, target_amount, target_currency")
-    .eq("user_id", profile.id).eq("status", "active").ilike("name", `%${contrib.goal_name}%`);
+  const { data: allGoals } = await supabase.from("savings_goals").select("id, name, current_amount, target_amount, target_currency")
+    .eq("user_id", profile.id).eq("status", "active");
 
-  if (!goals || goals.length === 0) { await sendMessage(chatId, `No active goal matching "${contrib.goal_name}".`); return; }
+  const goalMatch = fuzzyMatch(allGoals || [], contrib.goal_name);
+  if (!goalMatch) { await sendMessage(chatId, `No active goal matching "${contrib.goal_name}".`); return; }
 
-  const goal = goals[0];
+  const goal = (allGoals || []).find((g) => g.id === goalMatch.id)!;
   const exchangeRate = profile.exchange_rate || 0.709;
   let converted = contrib.amount;
   if (contrib.currency !== goal.target_currency) {
@@ -523,6 +547,7 @@ async function handleCreateDebt(supabase: SupabaseClient, chatId: string, profil
   const { error } = await supabase.from("debts").insert({
     user_id: profile.id, direction: debt.direction, person_name: debt.person_name,
     amount: debt.amount, currency: debt.currency, reason: debt.reason || null,
+    due_date: debt.due_date || null,
   });
 
   if (error) { await sendMessage(chatId, `Error: ${error.message}`); return; }
@@ -558,12 +583,13 @@ async function handlePayDebt(supabase: SupabaseClient, chatId: string, profile: 
   const personName = parsed.pay_debt?.person_name;
   if (!personName) { await sendMessage(chatId, "Who did you pay? Try: <i>I paid Ahmed</i>"); return; }
 
-  const { data: debts } = await supabase.from("debts").select("id, direction, person_name, amount, currency")
-    .eq("user_id", profile.id).eq("status", "active").ilike("person_name", `%${personName}%`);
+  const { data: allDebts } = await supabase.from("debts").select("id, direction, person_name, amount, currency")
+    .eq("user_id", profile.id).eq("status", "active");
 
-  if (!debts || debts.length === 0) { await sendMessage(chatId, `No active debt with "${personName}".`); return; }
+  const debtMatch = fuzzyMatch((allDebts || []).map((d) => ({ id: d.id, name: d.person_name })), personName);
+  if (!debtMatch) { await sendMessage(chatId, `No active debt with "${personName}".`); return; }
 
-  const debt = debts[0];
+  const debt = (allDebts || []).find((d) => d.id === debtMatch.id)!;
   const today = format(new Date(), "yyyy-MM-dd");
 
   // Create transaction
@@ -586,6 +612,96 @@ async function handlePayDebt(supabase: SupabaseClient, chatId: string, profile: 
   await sendMessage(chatId,
     `<b>Debt settled!</b>\n${debt.person_name} - ${formatCurrency(debt.amount, debt.currency as Currency)}\nTransaction logged automatically.`
   );
+}
+
+// ============ EDIT HANDLERS ============
+
+async function handleEditSubscription(supabase: SupabaseClient, chatId: string, profile: Profile, parsed: ParsedQuery) {
+  const edit = parsed.edit_subscription;
+  if (!edit?.name) { await sendMessage(chatId, "Which subscription? Try: <i>Edit Netflix billing date to May 1st</i>"); return; }
+
+  const { data: allSubs } = await supabase.from("subscriptions").select("id, name").eq("user_id", profile.id).eq("status", "active");
+  const match = fuzzyMatch(allSubs || [], edit.name);
+  if (!match) { await sendMessage(chatId, `No active subscription matching "${edit.name}".`); return; }
+
+  const updates: Record<string, string | number | null> = {};
+  if (edit.new_name) updates.name = edit.new_name;
+  if (edit.new_amount) updates.amount = edit.new_amount;
+  if (edit.new_currency) updates.currency = edit.new_currency;
+  if (edit.new_billing_cycle) updates.billing_cycle = edit.new_billing_cycle;
+  if (edit.new_start_date) updates.next_billing_date = edit.new_start_date;
+
+  if (Object.keys(updates).length === 0) { await sendMessage(chatId, "What do you want to change? Try: <i>Change Netflix billing date to May 1st</i>"); return; }
+
+  await supabase.from("subscriptions").update(updates as never).eq("id", match.id);
+
+  const changes = Object.entries(updates).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join("\n");
+  await sendMessage(chatId, `<b>${match.name} updated!</b>\n${changes}`);
+}
+
+async function handleEditBudget(supabase: SupabaseClient, chatId: string, profile: Profile, parsed: ParsedQuery, toDefault: (a: number, c: string) => number) {
+  const edit = parsed.edit_budget;
+  if (!edit) { await sendMessage(chatId, "Try: <i>Change budget to 600 JOD</i>"); return; }
+
+  let categoryId: string | null = null;
+  if (edit.category_hint) {
+    const cat = await findCategory(supabase, profile.id, edit.category_hint, "expense");
+    if (cat) categoryId = cat.id;
+  }
+
+  let query = supabase.from("budgets").select("id").eq("user_id", profile.id);
+  if (categoryId) { query = query.eq("category_id", categoryId); } else { query = query.is("category_id", null); }
+  const { data: existing } = await query.maybeSingle();
+
+  if (!existing) { await sendMessage(chatId, "No matching budget found. Set one first: <i>Set budget 500 JOD</i>"); return; }
+
+  const updates: Record<string, unknown> = { amount: edit.new_amount };
+  if (edit.new_currency) updates.currency = edit.new_currency;
+
+  await supabase.from("budgets").update(updates as never).eq("id", existing.id);
+  await sendMessage(chatId, `<b>Budget updated!</b>\nNew limit: ${formatCurrency(edit.new_amount, (edit.new_currency || profile.default_currency) as Currency)} / month`);
+}
+
+async function handleEditSavingsGoal(supabase: SupabaseClient, chatId: string, profile: Profile, parsed: ParsedQuery) {
+  const edit = parsed.edit_savings_goal;
+  if (!edit?.name) { await sendMessage(chatId, "Which goal? Try: <i>Edit Emergency Fund target to 8000</i>"); return; }
+
+  const { data: allGoals } = await supabase.from("savings_goals").select("id, name").eq("user_id", profile.id).eq("status", "active");
+  const match = fuzzyMatch(allGoals || [], edit.name);
+  if (!match) { await sendMessage(chatId, `No active goal matching "${edit.name}".`); return; }
+
+  const updates: Record<string, string | number | null> = {};
+  if (edit.new_name) updates.name = edit.new_name;
+  if (edit.new_target_amount) updates.target_amount = edit.new_target_amount;
+  if (edit.new_deadline) updates.deadline = edit.new_deadline;
+
+  if (Object.keys(updates).length === 0) { await sendMessage(chatId, "What do you want to change?"); return; }
+
+  await supabase.from("savings_goals").update(updates as never).eq("id", match.id);
+
+  const changes = Object.entries(updates).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join("\n");
+  await sendMessage(chatId, `<b>${match.name} updated!</b>\n${changes}`);
+}
+
+async function handleEditDebt(supabase: SupabaseClient, chatId: string, profile: Profile, parsed: ParsedQuery) {
+  const edit = parsed.edit_debt;
+  if (!edit?.person_name) { await sendMessage(chatId, "Which debt? Try: <i>Edit Ahmed's debt to 100 JOD</i>"); return; }
+
+  const { data: allDebts } = await supabase.from("debts").select("id, person_name").eq("user_id", profile.id).eq("status", "active");
+  const match = fuzzyMatch((allDebts || []).map((d) => ({ id: d.id, name: d.person_name })), edit.person_name);
+  if (!match) { await sendMessage(chatId, `No active debt with "${edit.person_name}".`); return; }
+
+  const updates: Record<string, string | number | null> = {};
+  if (edit.new_amount) updates.amount = edit.new_amount;
+  if (edit.new_due_date) updates.due_date = edit.new_due_date;
+  if (edit.new_reason) updates.reason = edit.new_reason;
+
+  if (Object.keys(updates).length === 0) { await sendMessage(chatId, "What do you want to change?"); return; }
+
+  await supabase.from("debts").update(updates as never).eq("id", match.id);
+
+  const changes = Object.entries(updates).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join("\n");
+  await sendMessage(chatId, `<b>Debt with ${match.name} updated!</b>\n${changes}`);
 }
 
 // GET handler: auto-registers webhook
