@@ -33,6 +33,12 @@ export async function downloadFileAsBase64(fileUrl: string): Promise<string> {
   return Buffer.from(buffer).toString("base64");
 }
 
+export async function downloadFileAsBuffer(fileUrl: string): Promise<Buffer> {
+  const res = await fetch(fileUrl);
+  const buffer = await res.arrayBuffer();
+  return Buffer.from(buffer);
+}
+
 export async function setWebhook(url: string) {
   const res = await fetch(`${BASE_URL}/setWebhook`, {
     method: "POST",
@@ -68,5 +74,19 @@ export interface TelegramUpdate {
       file_size?: number;
     }>;
     caption?: string;
+    voice?: {
+      file_id: string;
+      file_unique_id: string;
+      duration: number;
+      mime_type?: string;
+      file_size?: number;
+    };
+    audio?: {
+      file_id: string;
+      file_unique_id: string;
+      duration: number;
+      mime_type?: string;
+      file_size?: number;
+    };
   };
 }

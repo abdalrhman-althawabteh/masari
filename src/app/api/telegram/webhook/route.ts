@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendMessage, getFileUrl, downloadFileAsBase64, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
+import { sendMessage, getFileUrl, downloadFileAsBase64, downloadFileAsBuffer, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
+import { transcribeVoice } from "@/lib/telegram/transcribe";
 import { parseMessage, parseReceipt, fuzzyMatch, type ParsedQuery } from "@/lib/telegram/parse";
 import { getApiKey, type AIProvider } from "@/lib/ai/provider";
 import { formatCurrency, convertCurrency, type Currency } from "@/lib/currency";
@@ -125,6 +126,53 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  // Handle voice message
+  if (message.voice || message.audio) {
+    const voiceFile = message.voice || message.audio;
+    if (!voiceFile) return NextResponse.json({ ok: true });
+
+    if (!apiKey) {
+      await sendMessage(chatId, "No AI API key configured. Add one in Settings.");
+      return NextResponse.json({ ok: true });
+    }
+
+    await sendMessage(chatId, "Listening...");
+
+    const fileUrl = await getFileUrl(voiceFile.file_id);
+    if (!fileUrl) {
+      await sendMessage(chatId, "Couldn't download the voice message. Try again.");
+      return NextResponse.json({ ok: true });
+    }
+
+    try {
+      const audioBuffer = await downloadFileAsBuffer(fileUrl);
+      const transcription = await transcribeVoice(provider, apiKey, audioBuffer, voiceFile.mime_type);
+
+      if (!transcription) {
+        await sendMessage(chatId, "Couldn't transcribe the voice message. Try sending text instead.");
+        return NextResponse.json({ ok: true });
+      }
+
+      // Show what was heard, then process as text
+      await sendMessage(chatId, `<i>Heard: "${transcription}"</i>`);
+
+      // Now parse the transcription through the same text handler
+      const parsed = await parseMessage(provider, apiKey, transcription, defaultCurrency);
+
+      if (parsed.follow_up_question) {
+        await sendMessage(chatId, parsed.follow_up_question);
+        return NextResponse.json({ ok: true });
+      }
+
+      // Process the parsed intent — reuse the same switch below
+      // by setting text to transcription and falling through
+      return await processIntent(supabase, chatId, profile, parsed, defaultCurrency, toDefault);
+    } catch (err) {
+      await sendMessage(chatId, `Error: ${err instanceof Error ? err.message : "Voice processing failed"}`);
+      return NextResponse.json({ ok: true });
+    }
+  }
+
   // Handle text
   if (!message.text) return NextResponse.json({ ok: true });
   const text = message.text.trim();
@@ -143,102 +191,54 @@ export async function POST(request: Request) {
   try {
     const parsed = await parseMessage(provider, apiKey, text, defaultCurrency);
 
-    // If AI needs more info, ask the follow-up
     if (parsed.follow_up_question) {
       await sendMessage(chatId, parsed.follow_up_question);
       return NextResponse.json({ ok: true });
     }
 
-    switch (parsed.intent) {
-      case "log_transaction":
-        await handleLogTransaction(supabase, chatId, profile, parsed);
-        break;
-
-      case "check_balance":
-        await handleCheckBalance(supabase, chatId, profile, defaultCurrency, toDefault);
-        break;
-
-      case "today_spending":
-        await handleTodaySpending(supabase, chatId, profile, defaultCurrency, toDefault);
-        break;
-
-      case "upcoming_subs":
-        await handleUpcomingSubs(supabase, chatId, profile, defaultCurrency);
-        break;
-
-      case "create_subscription":
-        await handleCreateSubscription(supabase, chatId, profile, parsed);
-        break;
-
-      case "list_subscriptions":
-        await handleListSubscriptions(supabase, chatId, profile, defaultCurrency);
-        break;
-
-      case "cancel_subscription":
-        await handleCancelSubscription(supabase, chatId, profile, parsed);
-        break;
-
-      case "edit_subscription":
-        await handleEditSubscription(supabase, chatId, profile, parsed);
-        break;
-
-      case "set_budget":
-        await handleSetBudget(supabase, chatId, profile, parsed);
-        break;
-
-      case "edit_budget":
-        await handleEditBudget(supabase, chatId, profile, parsed, toDefault);
-        break;
-
-      case "check_budget":
-        await handleCheckBudget(supabase, chatId, profile, defaultCurrency, toDefault);
-        break;
-
-      case "create_savings_goal":
-        await handleCreateSavingsGoal(supabase, chatId, profile, parsed);
-        break;
-
-      case "edit_savings_goal":
-        await handleEditSavingsGoal(supabase, chatId, profile, parsed);
-        break;
-
-      case "contribute_savings":
-        await handleContributeSavings(supabase, chatId, profile, parsed);
-        break;
-
-      case "check_savings":
-        await handleCheckSavings(supabase, chatId, profile);
-        break;
-
-      case "create_debt":
-        await handleCreateDebt(supabase, chatId, profile, parsed);
-        break;
-
-      case "edit_debt":
-        await handleEditDebt(supabase, chatId, profile, parsed);
-        break;
-
-      case "list_debts":
-        await handleListDebts(supabase, chatId, profile, defaultCurrency, toDefault);
-        break;
-
-      case "pay_debt":
-        await handlePayDebt(supabase, chatId, profile, parsed);
-        break;
-
-      case "help":
-        await sendMessage(chatId, getHelpText(profile.name || ""));
-        break;
-
-      default:
-        await sendMessage(chatId,
-          "I didn't understand that. Try <i>Help</i> to see what I can do."
-        );
-    }
+    return await processIntent(supabase, chatId, profile, parsed, defaultCurrency, toDefault);
   } catch (err) {
     await sendMessage(chatId, `Error: ${err instanceof Error ? err.message : "Something went wrong"}`);
   }
 
+  return NextResponse.json({ ok: true });
+}
+
+async function processIntent(
+  supabase: SupabaseClient,
+  chatId: string,
+  profile: Profile,
+  parsed: ParsedQuery,
+  defaultCurrency: Currency,
+  toDefault: (a: number, c: string) => number
+): Promise<NextResponse> {
+  try {
+    switch (parsed.intent) {
+      case "log_transaction": await handleLogTransaction(supabase, chatId, profile, parsed); break;
+      case "check_balance": await handleCheckBalance(supabase, chatId, profile, defaultCurrency, toDefault); break;
+      case "today_spending": await handleTodaySpending(supabase, chatId, profile, defaultCurrency, toDefault); break;
+      case "upcoming_subs": await handleUpcomingSubs(supabase, chatId, profile, defaultCurrency); break;
+      case "create_subscription": await handleCreateSubscription(supabase, chatId, profile, parsed); break;
+      case "list_subscriptions": await handleListSubscriptions(supabase, chatId, profile, defaultCurrency); break;
+      case "cancel_subscription": await handleCancelSubscription(supabase, chatId, profile, parsed); break;
+      case "edit_subscription": await handleEditSubscription(supabase, chatId, profile, parsed); break;
+      case "set_budget": await handleSetBudget(supabase, chatId, profile, parsed); break;
+      case "edit_budget": await handleEditBudget(supabase, chatId, profile, parsed, toDefault); break;
+      case "check_budget": await handleCheckBudget(supabase, chatId, profile, defaultCurrency, toDefault); break;
+      case "create_savings_goal": await handleCreateSavingsGoal(supabase, chatId, profile, parsed); break;
+      case "edit_savings_goal": await handleEditSavingsGoal(supabase, chatId, profile, parsed); break;
+      case "contribute_savings": await handleContributeSavings(supabase, chatId, profile, parsed); break;
+      case "check_savings": await handleCheckSavings(supabase, chatId, profile); break;
+      case "create_debt": await handleCreateDebt(supabase, chatId, profile, parsed); break;
+      case "edit_debt": await handleEditDebt(supabase, chatId, profile, parsed); break;
+      case "list_debts": await handleListDebts(supabase, chatId, profile, defaultCurrency, toDefault); break;
+      case "pay_debt": await handlePayDebt(supabase, chatId, profile, parsed); break;
+      case "help": await sendMessage(chatId, getHelpText(profile.name || "")); break;
+      default: await sendMessage(chatId, "I didn't understand that. Try <i>Help</i> to see what I can do.");
+    }
+  } catch (err) {
+    await sendMessage(chatId, `Error: ${err instanceof Error ? err.message : "Something went wrong"}`);
+  }
   return NextResponse.json({ ok: true });
 }
 
