@@ -166,20 +166,31 @@ export default function TransactionsPage() {
                 {transactions.map((t) => (
                   <div
                     key={t.id}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-accent/30 group"
+                    className="flex items-center justify-between px-3 sm:px-4 py-3 hover:bg-accent/30 group gap-2"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-lg shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <span className="text-base sm:text-lg shrink-0">
                         {t.categories?.icon || "📁"}
                       </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{t.description}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium truncate">{t.description}</p>
+                          <span
+                            className={cn(
+                              "text-sm font-semibold shrink-0 sm:hidden",
+                              t.type === "income" ? "text-[var(--income)]" : "text-[var(--expense)]"
+                            )}
+                          >
+                            {t.type === "income" ? "+" : "-"}
+                            {formatCurrency(t.amount, t.currency)}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {t.categories?.name} &middot; {format(new Date(t.date + "T00:00:00"), "MMM d, yyyy")}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="hidden sm:flex items-center gap-2 shrink-0">
                       <span
                         className={cn(
                           "text-sm font-semibold",
@@ -210,6 +221,28 @@ export default function TransactionsPage() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
+                    </div>
+                    {/* Mobile actions */}
+                    <div className="flex sm:hidden items-center gap-0.5 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setEditingTransaction(t);
+                          setDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(t.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 ))}
