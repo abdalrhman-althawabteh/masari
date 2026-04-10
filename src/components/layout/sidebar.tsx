@@ -78,7 +78,7 @@ export function Sidebar() {
             >
               <item.icon className="h-5 w-5" />
               {item.label}
-              {count > 0 && (
+              {count > 0 && !isActive && (
                 <span className={cn(
                   "ml-auto text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full",
                   item.badge === "debts"
