@@ -401,27 +401,34 @@ export default function LandingContent() {
             </motion.h2>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-0">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              { n: "01", emoji: "🚀", t: "Create your account", d: "Sign up with email or Google. Pick your currency (USD or JOD)." },
-              { n: "02", emoji: "💬", t: "Log your money", d: "Add transactions from the app — or just text your Telegram bot." },
-              { n: "03", emoji: "🤖", t: "AI does the rest", d: "Auto-categorization, smart budgets, weekly reports, and financial advice." },
+              { n: "01", icon: CreditCard, t: "Create your account", d: "Sign up with email or Google. Pick your preferred currency (USD or JOD).", color: "#2d7a00" },
+              { n: "02", icon: ArrowLeftRight, t: "Log your money", d: "Add transactions from the app — or just send a message to your Telegram bot.", color: "#FF8A00" },
+              { n: "03", icon: Sparkles, t: "AI does the rest", d: "Auto-categorization, smart budgets, weekly reports, and personalized financial advice.", color: "#3B82F6" },
             ].map((step, i) => (
-              <motion.div key={step.n} variants={fadeIn} custom={i} className="flex gap-6 py-10 border-b border-[#1a1a1a]/[0.06] last:border-0">
-                <div className="text-4xl">{step.emoji}</div>
-                <div>
-                  <span className="text-[#2d7a00]/30 text-xs font-mono font-bold">{step.n}</span>
-                  <h3 className="font-bold text-xl text-[#1a1a1a] mt-1">{step.t}</h3>
-                  <p className="text-[#1a1a1a]/40 mt-2 leading-relaxed">{step.d}</p>
+              <motion.div
+                key={step.n}
+                variants={fadeIn}
+                custom={i}
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" as const, delay: i * 0.5 }}
+                className="bg-white rounded-3xl p-8 border border-black/[0.04] shadow-sm text-center"
+              >
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style={{ background: `${step.color}10` }}>
+                  <step.icon className="h-7 w-7" style={{ color: step.color }} />
                 </div>
+                <span className="text-[#2d7a00]/30 text-xs font-mono font-bold">{step.n}</span>
+                <h3 className="font-bold text-xl text-[#1a1a1a] mt-2">{step.t}</h3>
+                <p className="text-[#1a1a1a]/45 text-base mt-3 leading-relaxed">{step.d}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* ============ TELEGRAM — Lime ============ */}
-      <section className="bg-[#1a3d0a] py-24 sm:py-32 px-5 sm:px-8 relative">
+      {/* ============ TELEGRAM — Black ============ */}
+      <section className="bg-[#0a0a0a] py-24 sm:py-32 px-5 sm:px-8 relative">
         <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
           <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#FFFDF5" />
         </svg>
@@ -484,7 +491,7 @@ export default function LandingContent() {
       {/* ============ TRUST — White ============ */}
       <section className="bg-white py-24 sm:py-28 px-5 sm:px-8 relative">
         <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
-          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#1a3d0a" />
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#0a0a0a" />
         </svg>
 
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
