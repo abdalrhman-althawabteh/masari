@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { startOfMonth, endOfMonth, subMonths, addDays, format } from "date-fns";
+import { startOfMonth, endOfMonth, startOfWeek, subMonths, subDays, addDays, format } from "date-fns";
 
 export async function GET() {
   const supabase = await createClient();
@@ -123,6 +123,64 @@ export async function GET() {
     expense: Math.round(data.expense * 100) / 100,
   }));
 
+  // Week chart data (last 7 days)
+  const weekChartData: { day: string; income: number; expense: number }[] = [];
+  const weekStart = subDays(now, 6);
+  const { data: weekTx } = await supabase
+    .from("transactions")
+    .select("type, amount, currency, date")
+    .eq("user_id", user.id)
+    .gte("date", format(weekStart, "yyyy-MM-dd"))
+    .lte("date", format(now, "yyyy-MM-dd"));
+
+  const weekMap: Record<string, { income: number; expense: number }> = {};
+  for (let i = 0; i < 7; i++) {
+    const d = format(addDays(weekStart, i), "yyyy-MM-dd");
+    weekMap[d] = { income: 0, expense: 0 };
+  }
+  for (const t of weekTx || []) {
+    if (weekMap[t.date]) {
+      const c = toDefault(t.amount, t.currency);
+      if (t.type === "income") weekMap[t.date].income += c;
+      else weekMap[t.date].expense += c;
+    }
+  }
+  for (const [date, vals] of Object.entries(weekMap)) {
+    weekChartData.push({
+      day: format(new Date(date + "T00:00:00"), "EEE"),
+      income: Math.round(vals.income * 100) / 100,
+      expense: Math.round(vals.expense * 100) / 100,
+    });
+  }
+
+  // Year chart data (last 12 months)
+  const yearData: Record<string, { income: number; expense: number }> = {};
+  for (let i = 11; i >= 0; i--) {
+    const m = subMonths(now, i);
+    yearData[format(m, "yyyy-MM")] = { income: 0, expense: 0 };
+  }
+  const yearStart = format(startOfMonth(subMonths(now, 11)), "yyyy-MM-dd");
+  const { data: yearTx } = await supabase
+    .from("transactions")
+    .select("type, amount, currency, date")
+    .eq("user_id", user.id)
+    .gte("date", yearStart)
+    .lte("date", monthEnd);
+
+  for (const t of yearTx || []) {
+    const key = t.date.substring(0, 7);
+    if (yearData[key]) {
+      const c = toDefault(t.amount, t.currency);
+      if (t.type === "income") yearData[key].income += c;
+      else yearData[key].expense += c;
+    }
+  }
+  const yearChartArray = Object.entries(yearData).map(([month, data]) => ({
+    month: format(new Date(month + "-01"), "MMM"),
+    income: Math.round(data.income * 100) / 100,
+    expense: Math.round(data.expense * 100) / 100,
+  }));
+
   // Upcoming subscription renewals (next 7 days)
   const sevenDaysLater = format(addDays(now, 7), "yyyy-MM-dd");
   const today = format(now, "yyyy-MM-dd");
@@ -178,6 +236,8 @@ export async function GET() {
     prevExpenses: Math.round(prevExpenses * 100) / 100,
     recentTransactions: recent || [],
     monthlyChart: chartArray,
+    weekChart: weekChartData,
+    yearChart: yearChartArray,
     categoryBreakdown: categoryBreakdown.map((c) => ({
       name: c.name,
       icon: c.icon,

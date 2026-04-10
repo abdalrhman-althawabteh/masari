@@ -46,6 +46,8 @@ interface DashboardData {
   upcomingSubscriptions: UpcomingSub[];
   monthlySubscriptionCost: number;
   budget: { limit: number; spent: number; percentage: number } | null;
+  weekChart: { day: string; income: number; expense: number }[];
+  yearChart: { month: string; income: number; expense: number }[];
 }
 
 export default function DashboardPage() {
@@ -150,7 +152,11 @@ export default function DashboardPage() {
               </Card>
             )}
 
-            <SpendingChart data={data.monthlyChart} />
+            <SpendingChart
+              data={data.monthlyChart}
+              weekData={data.weekChart}
+              yearData={data.yearChart}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CategoryBreakdown

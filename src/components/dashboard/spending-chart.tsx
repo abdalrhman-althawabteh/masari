@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -11,25 +12,71 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+type Period = "week" | "month" | "year";
+
+interface ChartPoint {
+  label: string;
+  income: number;
+  expense: number;
+}
 
 interface SpendingChartProps {
   data: { month: string; income: number; expense: number }[];
+  weekData?: { day: string; income: number; expense: number }[];
+  yearData?: { month: string; income: number; expense: number }[];
 }
 
-export function SpendingChart({ data }: SpendingChartProps) {
+function normalize(
+  data: { month: string; income: number; expense: number }[],
+  weekData: { day: string; income: number; expense: number }[] | undefined,
+  yearData: { month: string; income: number; expense: number }[] | undefined,
+  period: Period
+): ChartPoint[] {
+  if (period === "week") {
+    return (weekData || []).map((d) => ({ label: d.day, income: d.income, expense: d.expense }));
+  }
+  if (period === "year") {
+    return (yearData || data).map((d) => ({ label: d.month, income: d.income, expense: d.expense }));
+  }
+  return data.map((d) => ({ label: d.month, income: d.income, expense: d.expense }));
+}
+
+export function SpendingChart({ data, weekData, yearData }: SpendingChartProps) {
+  const [period, setPeriod] = useState<Period>("month");
+
+  const chartData = normalize(data, weekData, yearData, period);
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">Income vs Expenses</CardTitle>
+        <div className="flex rounded-lg border border-border overflow-hidden">
+          {(["week", "month", "year"] as Period[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={cn(
+                "px-3 py-1 text-xs font-medium transition-colors capitalize",
+                period === p
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {chartData.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
             No data yet. Add transactions to see your chart.
           </p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--income)" stopOpacity={0.3} />
@@ -42,7 +89,7 @@ export function SpendingChart({ data }: SpendingChartProps) {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
-                dataKey="month"
+                dataKey="label"
                 stroke="var(--muted-foreground)"
                 fontSize={12}
                 tickLine={false}
