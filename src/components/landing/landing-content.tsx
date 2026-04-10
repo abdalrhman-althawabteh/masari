@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { DotGlobeHero } from "@/components/ui/globe-hero";
 import {
   ArrowRight,
   BarChart3,
@@ -24,9 +23,13 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
+  Users,
+  GraduationCap,
+  Briefcase,
+  Heart,
 } from "lucide-react";
 
-const fadeUp = {
+const fadeIn = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
@@ -35,121 +38,102 @@ const fadeUp = {
   }),
 };
 
-const stagger = {
-  visible: { transition: { staggerChildren: 0.08 } },
-};
+const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
 
 export default function LandingContent() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen overflow-hidden">
+      {/* ============ NAV ============ */}
+      <nav className="fixed top-0 w-full z-50 bg-[#FFFDF5]/80 backdrop-blur-xl border-b border-black/[0.04]">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#1a1a1a] flex items-center justify-center">
+              <span className="text-[#A3FF3C] font-black text-sm">M</span>
+            </div>
+            <span className="text-lg font-bold text-[#1a1a1a] tracking-tight">Masari</span>
+          </Link>
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-[#A3FF3C]">Masari</span>
-            <span className="text-sm text-white/40">مصاري</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm text-white/70 hover:text-white transition-colors px-3 py-1.5"
-            >
-              Sign In
+            <Link href="/login" className="text-sm text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors px-4 py-2 font-medium">
+              Log in
             </Link>
-            <Link
-              href="/signup"
-              className="text-sm font-medium bg-[#A3FF3C] text-black px-4 py-2 rounded-lg hover:bg-[#8FE635] transition-colors"
-            >
-              Get Started
+            <Link href="/signup" className="text-sm font-semibold bg-[#1a1a1a] text-white px-5 py-2.5 rounded-full hover:bg-[#333] transition-all">
+              Get started free
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero with Globe */}
-      <DotGlobeHero
-        rotationSpeed={0.003}
-        globeRadius={1.3}
-        className="bg-[#0a0a0a]"
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a]/50 z-[1]" />
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#A3FF3C]/5 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-[#A3FF3C]/3 rounded-full blur-[100px] animate-pulse" />
-
-        <div className="relative z-10 text-center space-y-8 max-w-5xl mx-auto px-4 sm:px-6 pt-16">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#A3FF3C]/5 border border-[#A3FF3C]/20 backdrop-blur-xl"
-          >
-            <div className="w-1.5 h-1.5 bg-[#A3FF3C] rounded-full animate-ping" />
-            <span className="text-xs font-semibold text-[#A3FF3C] tracking-wider uppercase">
-              AI-Powered Finance
+      {/* ============ HERO — Cream ============ */}
+      <section className="relative bg-[#FFFDF5] pt-32 pb-20 sm:pt-40 sm:pb-28">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#A3FF3C]/20 text-[#2d7a00] text-sm font-semibold mb-8">
+              <Sparkles className="h-3.5 w-3.5" /> AI-Powered Finance
             </span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-5xl sm:text-6xl lg:text-8xl font-bold text-white leading-[1.05] tracking-tight"
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-[clamp(2.8rem,7vw,5.5rem)] font-bold leading-[1.05] tracking-[-0.03em] text-[#1a1a1a]"
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
           >
-            <span className="block text-white/70 font-light text-3xl sm:text-4xl lg:text-5xl mb-2">
-              Your money,
-            </span>
-            <span className="relative">
-              <span className="bg-gradient-to-r from-[#A3FF3C] via-[#A3FF3C] to-[#6FCF17] bg-clip-text text-transparent">
-                under control.
-              </span>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 1.2, delay: 1.2, ease: "easeOut" }}
-                className="absolute -bottom-3 left-0 h-1 bg-gradient-to-r from-[#A3FF3C] via-[#A3FF3C]/60 to-transparent rounded-full"
-              />
-            </span>
+            Don&apos;t guess,
+            <br />
+            <span className="italic text-[#2d7a00]">just track.</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="mt-6 text-lg sm:text-xl text-[#1a1a1a]/50 max-w-xl mx-auto leading-relaxed"
           >
-            Track income, expenses, subscriptions, debts, and savings — all in one place.
-            AI categorizes your spending. Telegram bot logs on the go.
+            The personal finance app that turns chaos into clarity. AI categorizes. Telegram logs on the go. You stay in control.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 bg-[#A3FF3C] text-black font-semibold px-8 py-3.5 rounded-xl hover:bg-[#8FE635] transition-all text-base shadow-xl shadow-[#A3FF3C]/10"
-              >
-                Start for Free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2 border border-white/10 text-white/70 font-medium px-8 py-3.5 rounded-xl hover:bg-white/5 hover:text-white transition-all text-base backdrop-blur-xl"
-              >
-                I have an account
-              </Link>
-            </motion.div>
+            <Link href="/signup" className="group inline-flex items-center gap-2 bg-[#1a1a1a] text-white font-semibold px-8 py-3.5 rounded-full hover:bg-[#333] transition-all text-base">
+              Start for free <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <Link href="#features" className="inline-flex items-center gap-1 text-[#1a1a1a]/50 hover:text-[#1a1a1a] font-medium px-5 py-3.5 text-base transition-colors">
+              See what&apos;s inside
+            </Link>
           </motion.div>
         </div>
-      </DotGlobeHero>
 
-      {/* Full App Preview */}
-      <section className="relative -mt-32 z-20 px-4 sm:px-6 pb-20">
+        {/* Marquee */}
+        <div className="mt-16 overflow-hidden border-y border-black/[0.04] py-4 bg-[#FFFDF5]">
+          <div className="flex animate-marquee whitespace-nowrap gap-10 text-[#1a1a1a]/20 text-sm font-semibold tracking-wide">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <span key={i} className="flex items-center gap-10">
+                <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> TRANSACTIONS</span>
+                <span className="flex items-center gap-2"><CalendarDays className="h-4 w-4" /> SUBSCRIPTIONS</span>
+                <span className="flex items-center gap-2"><Target className="h-4 w-4" /> BUDGETS</span>
+                <span className="flex items-center gap-2"><PiggyBank className="h-4 w-4" /> SAVINGS</span>
+                <span className="flex items-center gap-2"><Handshake className="h-4 w-4" /> DEBTS</span>
+                <span className="flex items-center gap-2"><Brain className="h-4 w-4" /> AI</span>
+                <span className="flex items-center gap-2"><Bot className="h-4 w-4" /> TELEGRAM</span>
+                <span className="flex items-center gap-2"><BarChart3 className="h-4 w-4" /> REPORTS</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Curved divider */}
+        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 60L1440 60V30C1200 0 240 0 0 30V60Z" fill="white" />
+        </svg>
+      </section>
+
+      {/* ============ APP PREVIEW — White ============ */}
+      <section className="bg-white py-16 sm:py-24 px-5 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -157,129 +141,160 @@ export default function LandingContent() {
           transition={{ duration: 0.8 }}
           className="max-w-5xl mx-auto"
         >
-          <div className="rounded-2xl border border-white/10 bg-[#111] p-1.5 shadow-2xl shadow-black/50">
-            <div className="rounded-xl bg-[#0f0f0f] overflow-hidden">
-              {/* Browser dots */}
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/5">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
-                <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
-                <div className="ml-4 flex-1 h-5 rounded bg-white/5 max-w-xs" />
+          <div className="rounded-[28px] border-2 border-[#eee] bg-[#fafafa] p-2 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]">
+            <div className="rounded-[22px] bg-[#0f0f0f] overflow-hidden">
+              <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                </div>
+                <div className="ml-4 h-6 rounded-full bg-white/5 flex-1 max-w-xs flex items-center px-3">
+                  <span className="text-[10px] text-white/20">masari.app/dashboard</span>
+                </div>
               </div>
 
-              <div className="flex min-h-[420px] sm:min-h-[480px]">
-                {/* Sidebar */}
-                <div className="hidden sm:flex flex-col w-52 border-r border-white/5 bg-[#111] p-4">
-                  <div className="flex items-center gap-2 mb-8">
-                    <span className="text-sm font-bold text-[#A3FF3C]">Masari</span>
-                    <span className="text-[10px] text-white/30">مصاري</span>
+              <div className="flex min-h-[400px]">
+                <div className="hidden sm:flex flex-col w-48 border-r border-white/5 bg-[#0a0a0a] p-3">
+                  <div className="flex items-center gap-2 mb-6 px-1">
+                    <div className="w-5 h-5 rounded bg-[#A3FF3C] flex items-center justify-center">
+                      <span className="text-black font-black text-[7px]">M</span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-white">Masari</span>
                   </div>
-                  <div className="space-y-1">
-                    {[
-                      { icon: LayoutDashboard, label: "Dashboard", active: true },
-                      { icon: ArrowLeftRight, label: "Transactions", active: false },
-                      { icon: CalendarDays, label: "Subscriptions", active: false },
-                      { icon: Target, label: "Budgets", active: false },
-                      { icon: PiggyBank, label: "Savings", active: false },
-                      { icon: Handshake, label: "Debts", active: false },
-                      { icon: Tags, label: "Categories", active: false },
-                      { icon: Settings, label: "Settings", active: false },
-                    ].map((item) => (
-                      <div
-                        key={item.label}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs ${
-                          item.active
-                            ? "bg-[#A3FF3C]/10 text-[#A3FF3C]"
-                            : "text-white/30"
-                        }`}
-                      >
-                        <item.icon className="h-3.5 w-3.5" />
-                        {item.label}
-                      </div>
-                    ))}
-                  </div>
+                  {[
+                    { icon: LayoutDashboard, label: "Dashboard", active: true },
+                    { icon: ArrowLeftRight, label: "Transactions" },
+                    { icon: CalendarDays, label: "Subscriptions" },
+                    { icon: Target, label: "Budgets" },
+                    { icon: PiggyBank, label: "Savings" },
+                    { icon: Handshake, label: "Debts" },
+                    { icon: Tags, label: "Categories" },
+                    { icon: Settings, label: "Settings" },
+                  ].map((item) => (
+                    <div key={item.label} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[10px] mb-0.5 ${item.active ? "bg-[#A3FF3C]/10 text-[#A3FF3C]" : "text-white/20"}`}>
+                      <item.icon className="h-3 w-3" />{item.label}
+                    </div>
+                  ))}
                 </div>
-
-                {/* Main content */}
-                <div className="flex-1 p-4 sm:p-6 space-y-4">
-                  {/* Summary cards */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="flex-1 p-4 sm:p-5 space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
                     {[
-                      { label: "Income", value: "$4,250", icon: TrendingUp, color: "#A3FF3C" },
-                      { label: "Expenses", value: "$2,847", icon: TrendingDown, color: "#FF4444" },
-                      { label: "Balance", value: "$1,403", icon: Wallet, color: "#A3FF3C" },
+                      { l: "Income", v: "$4,250", icon: TrendingUp, c: "#A3FF3C" },
+                      { l: "Expenses", v: "$2,847", icon: TrendingDown, c: "#FF4444" },
+                      { l: "Balance", v: "$1,403", icon: Wallet, c: "#A3FF3C" },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-xl bg-[#1a1a1a] border border-white/5 p-3 sm:p-4">
-                        <div className="flex items-center justify-between">
-                          <p className="text-[9px] sm:text-[10px] text-white/40">{card.label}</p>
-                          <card.icon className="h-3 w-3" style={{ color: card.color }} />
+                      <div key={card.l} className="rounded-xl bg-white/[0.03] border border-white/5 p-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] text-white/30">{card.l}</span>
+                          <card.icon className="h-3 w-3" style={{ color: card.c }} />
                         </div>
-                        <p className="text-xs sm:text-lg font-bold mt-1" style={{ color: card.color }}>
-                          {card.value}
-                        </p>
+                        <p className="text-xs sm:text-base font-bold mt-1" style={{ color: card.c }}>{card.v}</p>
                       </div>
                     ))}
                   </div>
-
-                  {/* Chart area */}
-                  <div className="rounded-xl bg-[#1a1a1a] border border-white/5 p-4">
-                    <p className="text-[10px] text-white/40 mb-3">Income vs Expenses</p>
-                    <div className="flex items-end gap-1.5 sm:gap-2 h-28 sm:h-36">
-                      {[
-                        { h1: 35, h2: 25 }, { h1: 50, h2: 40 }, { h1: 40, h2: 55 },
-                        { h1: 65, h2: 45 }, { h1: 55, h2: 35 }, { h1: 70, h2: 50 },
-                        { h1: 60, h2: 40 }, { h1: 80, h2: 55 }, { h1: 75, h2: 45 },
-                        { h1: 90, h2: 60 }, { h1: 85, h2: 50 }, { h1: 95, h2: 55 },
-                      ].map((bar, i) => (
-                        <div key={i} className="flex-1 flex gap-0.5">
-                          <motion.div
-                            initial={{ height: 0 }}
-                            whileInView={{ height: `${bar.h1}%` }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.8 + i * 0.05 }}
-                            className="flex-1 rounded-t-sm bg-gradient-to-t from-[#A3FF3C]/30 to-[#A3FF3C]/60"
-                          />
-                          <motion.div
-                            initial={{ height: 0 }}
-                            whileInView={{ height: `${bar.h2}%` }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.9 + i * 0.05 }}
-                            className="flex-1 rounded-t-sm bg-gradient-to-t from-[#FF4444]/20 to-[#FF4444]/50"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Bottom row */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    {/* Recent transactions */}
-                    <div className="rounded-xl bg-[#1a1a1a] border border-white/5 p-3 sm:p-4">
-                      <p className="text-[10px] text-white/40 mb-2">Recent</p>
-                      {[
-                        { name: "Uber", amount: "-$8.50", color: "#FF4444" },
-                        { name: "Freelance", amount: "+$500", color: "#A3FF3C" },
-                        { name: "Netflix", amount: "-$15.99", color: "#FF4444" },
-                      ].map((tx) => (
-                        <div key={tx.name} className="flex items-center justify-between py-1.5">
-                          <span className="text-[10px] sm:text-xs text-white/50">{tx.name}</span>
-                          <span className="text-[10px] sm:text-xs font-medium" style={{ color: tx.color }}>
-                            {tx.amount}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* AI widget */}
-                    <div className="rounded-xl bg-[#1a1a1a] border border-[#A3FF3C]/10 p-3 sm:p-4">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <Sparkles className="h-3 w-3 text-[#A3FF3C]" />
-                        <p className="text-[10px] text-[#A3FF3C]">Can I Spend?</p>
+                  <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[10px] text-white/30">Income vs Expenses</p>
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1 text-[9px] text-white/30"><span className="w-2 h-2 rounded-full bg-[#A3FF3C]/60" />Income</span>
+                        <span className="flex items-center gap-1 text-[9px] text-white/30"><span className="w-2 h-2 rounded-full bg-[#FF4444]/60" />Expenses</span>
                       </div>
-                      <div className="rounded-lg bg-[#A3FF3C]/5 border border-[#A3FF3C]/10 p-2 sm:p-2.5">
-                        <p className="text-[9px] sm:text-[10px] text-white/50 leading-relaxed">
-                          &quot;You have room for this purchase. Budget is at 62% with $380 remaining.&quot;
-                        </p>
-                      </div>
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      <svg viewBox="0 0 500 120" className="w-full h-28 sm:h-36" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#A3FF3C" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#A3FF3C" stopOpacity="0" />
+                          </linearGradient>
+                          <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FF4444" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#FF4444" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {/* Income area */}
+                        <motion.path
+                          d="M0,90 C40,85 60,70 100,60 C140,50 160,35 200,30 C240,25 260,40 300,35 C340,30 360,20 400,15 C440,10 480,18 500,12 L500,120 L0,120 Z"
+                          fill="url(#incomeGrad)"
+                          initial={{ opacity: 0, pathLength: 0 }}
+                          whileInView={{ opacity: 1, pathLength: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.5, delay: 0.5 }}
+                        />
+                        <motion.path
+                          d="M0,90 C40,85 60,70 100,60 C140,50 160,35 200,30 C240,25 260,40 300,35 C340,30 360,20 400,15 C440,10 480,18 500,12"
+                          fill="none"
+                          stroke="#A3FF3C"
+                          strokeWidth="2"
+                          initial={{ pathLength: 0 }}
+                          whileInView={{ pathLength: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.5, delay: 0.5 }}
+                        />
+                        {/* Expense area */}
+                        <motion.path
+                          d="M0,95 C40,92 60,85 100,80 C140,75 160,65 200,70 C240,75 260,60 300,65 C340,70 360,55 400,50 C440,45 480,52 500,48 L500,120 L0,120 Z"
+                          fill="url(#expenseGrad)"
+                          initial={{ opacity: 0, pathLength: 0 }}
+                          whileInView={{ opacity: 1, pathLength: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.5, delay: 0.7 }}
+                        />
+                        <motion.path
+                          d="M0,95 C40,92 60,85 100,80 C140,75 160,65 200,70 C240,75 260,60 300,65 C340,70 360,55 400,50 C440,45 480,52 500,48"
+                          fill="none"
+                          stroke="#FF4444"
+                          strokeWidth="2"
+                          initial={{ pathLength: 0 }}
+                          whileInView={{ pathLength: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.5, delay: 0.7 }}
+                        />
+                        {/* Dots on income line */}
+                        {[
+                          [0, 90], [100, 60], [200, 30], [300, 35], [400, 15], [500, 12],
+                        ].map(([cx, cy], i) => (
+                          <motion.circle
+                            key={`inc-${i}`}
+                            cx={cx}
+                            cy={cy}
+                            r="3"
+                            fill="#A3FF3C"
+                            initial={{ opacity: 0, scale: 0 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.3, delay: 1 + i * 0.1 }}
+                          />
+                        ))}
+                        {/* Dots on expense line */}
+                        {[
+                          [0, 95], [100, 80], [200, 70], [300, 65], [400, 50], [500, 48],
+                        ].map(([cx, cy], i) => (
+                          <motion.circle
+                            key={`exp-${i}`}
+                            cx={cx}
+                            cy={cy}
+                            r="3"
+                            fill="#FF4444"
+                            initial={{ opacity: 0, scale: 0 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.3, delay: 1.2 + i * 0.1 }}
+                          />
+                        ))}
+                      </svg>
+                    </motion.div>
+                    {/* Month labels */}
+                    <div className="flex justify-between mt-1 px-1">
+                      {["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map((m) => (
+                        <span key={m} className="text-[8px] text-white/20">{m}</span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -289,170 +304,246 @@ export default function LandingContent() {
         </motion.div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 px-4 sm:px-6 border-t border-white/5">
+      {/* ============ USE CASES — Soft Green ============ */}
+      <section className="bg-[#F0F9E8] py-24 sm:py-32 px-5 sm:px-8 relative">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="white" />
+        </svg>
+
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={stagger}
-            className="text-center mb-16"
-          >
-            <motion.h2
-              variants={fadeUp}
-              custom={0}
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white"
-            >
-              Everything you need
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
+            <motion.p variants={fadeIn} custom={0} className="text-[#2d7a00] text-sm font-bold mb-3 tracking-wider uppercase">Who it&apos;s for</motion.p>
+            <motion.h2 variants={fadeIn} custom={1} className="text-3xl sm:text-5xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+              Built for <span className="italic text-[#2d7a00]">real people</span>
             </motion.h2>
-            <motion.p variants={fadeUp} custom={1} className="mt-4 text-white/40 max-w-xl mx-auto text-lg">
-              Built for people who want to understand where their money goes.
-            </motion.p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={stagger}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: CreditCard, title: "Transaction Tracking", desc: "Log income and expenses with dual currency (USD & JOD). Filter, search, edit anytime.", highlight: false },
-              { icon: Brain, title: "AI Categorization", desc: "Type a description — AI suggests the category. It learns from your corrections over time.", highlight: true },
-              { icon: CalendarDays, title: "Subscription Manager", desc: "Track recurring payments, upcoming renewals, auto-log expenses when they renew.", highlight: false },
-              { icon: Target, title: "Budgets & Limits", desc: "Set monthly budgets — total or per category. Warnings when approaching limits.", highlight: false },
-              { icon: Bot, title: "Telegram Bot", desc: 'Message "Spent 15 JOD on lunch" — logged instantly. Send receipt photos for AI scanning.', highlight: true },
-              { icon: PiggyBank, title: "Savings Goals", desc: "Set targets, track contributions, see projected completion dates.", highlight: false },
-              { icon: Handshake, title: "Debt Tracker", desc: "Track who owes who. Mark as paid — auto-creates a transaction.", highlight: false },
-              { icon: BarChart3, title: "Smart Reports", desc: "Weekly and monthly email reports with trends and AI financial advice.", highlight: false },
-              { icon: Sparkles, title: '"Can I Spend This?"', desc: "Ask AI if you can afford a purchase. It checks budget, bills, and income.", highlight: true },
+              { icon: Briefcase, title: "Freelancers", desc: "Track client income, project expenses, and invoices in one place.", color: "#FF8A00" },
+              { icon: Heart, title: "Families", desc: "Shared budgets, track household expenses, plan savings together.", color: "#FF4444" },
+              { icon: GraduationCap, title: "Students", desc: "Stay on budget with limited income. Track every dinar and dollar.", color: "#3B82F6" },
+              { icon: Users, title: "Small Teams", desc: "Track business subscriptions, team expenses, and monthly budgets.", color: "#8B5CF6" },
+            ].map((uc, i) => (
+              <motion.div
+                key={uc.title}
+                variants={fadeIn}
+                custom={i}
+                className="bg-white rounded-3xl p-7 border border-black/[0.04] hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+              >
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5" style={{ background: `${uc.color}15` }}>
+                  <uc.icon className="h-6 w-6" style={{ color: uc.color }} />
+                </div>
+                <h3 className="font-bold text-lg text-[#1a1a1a]">{uc.title}</h3>
+                <p className="text-[#1a1a1a]/50 text-sm mt-2 leading-relaxed">{uc.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============ FEATURES — Dark ============ */}
+      <section id="features" className="bg-[#0f0f0f] py-24 sm:py-32 px-5 sm:px-8 relative">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#F0F9E8" />
+        </svg>
+
+        <div className="max-w-6xl mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
+            <motion.p variants={fadeIn} custom={0} className="text-[#A3FF3C] text-sm font-bold mb-3 tracking-wider uppercase">Features</motion.p>
+            <motion.h2 variants={fadeIn} custom={1} className="text-3xl sm:text-5xl font-bold text-white tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+              Everything you need,
+              <br /><span className="italic text-white/30">nothing you don&apos;t.</span>
+            </motion.h2>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { icon: CreditCard, title: "Transactions", desc: "Log income & expenses in USD or JOD.", bg: "#1a1a1a", accent: "#A3FF3C" },
+              { icon: Brain, title: "AI Categorization", desc: "AI suggests categories. Learns from you.", bg: "#1c2a10", accent: "#A3FF3C" },
+              { icon: CalendarDays, title: "Subscriptions", desc: "Track recurring payments. Auto-log renewals.", bg: "#1a1a1a", accent: "#FF8A00" },
+              { icon: Target, title: "Budgets", desc: "Monthly limits with visual progress bars.", bg: "#1a1a1a", accent: "#3B82F6" },
+              { icon: Bot, title: "Telegram Bot", desc: "Message to log. Send receipts for scanning.", bg: "#1a1a20", accent: "#8B5CF6" },
+              { icon: PiggyBank, title: "Savings Goals", desc: "Set targets. Track contributions. AI projects.", bg: "#1a1a1a", accent: "#A3FF3C" },
+              { icon: Handshake, title: "Debts", desc: "Track who owes who. Mark paid → auto-transaction.", bg: "#1a1a1a", accent: "#FF4444" },
+              { icon: BarChart3, title: "Email Reports", desc: "Weekly & monthly with AI financial advice.", bg: "#1a1a1a", accent: "#FF8A00" },
+              { icon: Sparkles, title: "\"Can I Spend?\"", desc: "Ask AI — it checks budget, bills, income.", bg: "#1c2a10", accent: "#A3FF3C" },
             ].map((f, i) => (
               <motion.div
                 key={f.title}
-                variants={fadeUp}
+                variants={fadeIn}
                 custom={i}
-                whileHover={{ y: -4, borderColor: f.highlight ? "rgba(163,255,60,0.3)" : "rgba(255,255,255,0.1)" }}
-                className={`rounded-2xl border p-6 transition-all ${
-                  f.highlight
-                    ? "border-[#A3FF3C]/15 bg-[#A3FF3C]/[0.02]"
-                    : "border-white/5 bg-white/[0.01]"
-                }`}
+                className="rounded-2xl p-6 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300"
+                style={{ background: f.bg }}
               >
-                <div className={`inline-flex p-2.5 rounded-xl mb-4 ${
-                  f.highlight ? "bg-[#A3FF3C]/10 text-[#A3FF3C]" : "bg-white/5 text-white/50"
-                }`}>
-                  <f.icon className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${f.accent}15` }}>
+                  <f.icon className="h-5 w-5" style={{ color: f.accent }} />
                 </div>
-                <h3 className="text-white font-semibold">{f.title}</h3>
-                <p className="text-white/40 text-sm mt-2 leading-relaxed">{f.desc}</p>
+                <h3 className="font-semibold text-white">{f.title}</h3>
+                <p className="text-white/35 text-sm mt-1.5 leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-24 px-4 sm:px-6 border-t border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="text-center mb-16"
-          >
-            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold text-white">
-              Simple to start
+      {/* ============ HOW IT WORKS — Cream ============ */}
+      <section className="bg-[#FFFDF5] py-24 sm:py-32 px-5 sm:px-8 relative">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#0f0f0f" />
+        </svg>
+
+        <div className="max-w-3xl mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-16">
+            <motion.p variants={fadeIn} custom={0} className="text-[#2d7a00] text-sm font-bold mb-3 tracking-wider uppercase">How it works</motion.p>
+            <motion.h2 variants={fadeIn} custom={1} className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+              Ready in <span className="italic text-[#2d7a00]">60 seconds</span>
             </motion.h2>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-8"
-          >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-0">
             {[
-              { n: "01", t: "Create your account", d: "Sign up with email or Google. Set your preferred currency." },
-              { n: "02", t: "Log your transactions", d: "Add income and expenses from the app or via Telegram." },
-              { n: "03", t: "Let AI do the rest", d: "Auto-categorization, budgets, reports, and insights." },
-            ].map((s, i) => (
-              <motion.div key={s.n} variants={fadeUp} custom={i} className="text-center">
-                <div className="text-5xl font-bold text-[#A3FF3C]/15 mb-3">{s.n}</div>
-                <h3 className="text-white font-semibold">{s.t}</h3>
-                <p className="text-white/40 text-sm mt-2">{s.d}</p>
+              { n: "01", emoji: "🚀", t: "Create your account", d: "Sign up with email or Google. Pick your currency (USD or JOD)." },
+              { n: "02", emoji: "💬", t: "Log your money", d: "Add transactions from the app — or just text your Telegram bot." },
+              { n: "03", emoji: "🤖", t: "AI does the rest", d: "Auto-categorization, smart budgets, weekly reports, and financial advice." },
+            ].map((step, i) => (
+              <motion.div key={step.n} variants={fadeIn} custom={i} className="flex gap-6 py-10 border-b border-[#1a1a1a]/[0.06] last:border-0">
+                <div className="text-4xl">{step.emoji}</div>
+                <div>
+                  <span className="text-[#2d7a00]/30 text-xs font-mono font-bold">{step.n}</span>
+                  <h3 className="font-bold text-xl text-[#1a1a1a] mt-1">{step.t}</h3>
+                  <p className="text-[#1a1a1a]/40 mt-2 leading-relaxed">{step.d}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* Trust */}
-      <section className="py-20 px-4 sm:px-6 border-t border-white/5">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center"
-        >
+      {/* ============ TELEGRAM — Lime ============ */}
+      <section className="bg-[#1a3d0a] py-24 sm:py-32 px-5 sm:px-8 relative">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#FFFDF5" />
+        </svg>
+
+        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+          <div className="flex-1 text-center lg:text-left">
+            <Bot className="h-12 w-12 text-[#A3FF3C]/70 mb-6 mx-auto lg:mx-0" />
+            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+              Log expenses
+              <br /><span className="italic text-[#A3FF3C]">from Telegram.</span>
+            </h2>
+            <p className="mt-4 text-white/60 text-lg leading-relaxed max-w-md mx-auto lg:mx-0">
+              Just message your bot. &quot;Spent 15 JOD on lunch&quot; — done. Send a receipt photo — AI scans it. Ask &quot;what&apos;s my balance?&quot; — instant answer.
+            </p>
+          </div>
+          <div className="flex-1 max-w-sm w-full">
+            <div className="bg-[#1a1a1a] rounded-3xl p-5 shadow-2xl">
+              <div className="flex items-center gap-3 mb-5 pb-4 border-b border-white/10">
+                <div className="w-10 h-10 rounded-full bg-[#A3FF3C]/20 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-[#A3FF3C]" />
+                </div>
+                <div>
+                  <p className="text-white text-sm font-semibold">Masari Bot</p>
+                  <p className="text-white/40 text-xs">online</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-end">
+                  <div className="bg-[#A3FF3C] text-black text-sm px-4 py-2.5 rounded-2xl rounded-br-md max-w-[220px] font-medium">
+                    Spent 15 JOD on lunch
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-white/10 text-white text-sm px-4 py-2.5 rounded-2xl rounded-bl-md max-w-[250px]">
+                    ✅ <strong>Expense logged!</strong><br />
+                    💸 -15.00 JOD<br />
+                    📝 Lunch<br />
+                    📁 Food & Dining
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="bg-[#A3FF3C] text-black text-sm px-4 py-2.5 rounded-2xl rounded-br-md font-medium">
+                    What&apos;s my balance?
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-white/10 text-white text-sm px-4 py-2.5 rounded-2xl rounded-bl-md">
+                    📊 <strong>This month:</strong><br />
+                    💰 Income: $4,250<br />
+                    💸 Expenses: $2,862<br />
+                    ✅ Balance: $1,388
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ TRUST — White ============ */}
+      <section className="bg-white py-24 sm:py-28 px-5 sm:px-8 relative">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="#1a3d0a" />
+        </svg>
+
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           {[
-            { icon: Shield, t: "Privacy First", d: "No bank connections. Your data stays yours." },
-            { icon: Zap, t: "Multi-Provider AI", d: "OpenAI, Anthropic, or Gemini. Your choice." },
-            { icon: Smartphone, t: "Works Everywhere", d: "Web app + Telegram bot for on-the-go logging." },
+            { icon: Shield, title: "Privacy First", desc: "No bank connections. You control everything that goes in.", color: "#2d7a00" },
+            { icon: Zap, title: "Your AI Choice", desc: "Works with OpenAI, Anthropic, or Gemini. Bring your key.", color: "#FF8A00" },
+            { icon: Smartphone, title: "Works Everywhere", desc: "Web dashboard on any device. Telegram bot for quick logging.", color: "#3B82F6" },
           ].map((item, i) => (
-            <motion.div key={item.t} variants={fadeUp} custom={i} className="p-6">
-              <item.icon className="h-8 w-8 text-[#A3FF3C] mx-auto mb-3" />
-              <h3 className="text-white font-semibold">{item.t}</h3>
-              <p className="text-white/40 text-sm mt-2">{item.d}</p>
+            <motion.div key={item.title} variants={fadeIn} custom={i} className="p-8">
+              <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center" style={{ background: `${item.color}10` }}>
+                <item.icon className="h-7 w-7" style={{ color: item.color }} />
+              </div>
+              <h3 className="font-bold text-lg text-[#1a1a1a]">{item.title}</h3>
+              <p className="text-[#1a1a1a]/40 text-sm mt-2 leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 px-4 sm:px-6 border-t border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#A3FF3C]/5 via-transparent to-transparent" />
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="max-w-2xl mx-auto text-center relative z-10"
-        >
-          <h2 className="text-3xl sm:text-5xl font-bold text-white">
-            Start managing your
-            <br />
-            <span className="text-[#A3FF3C]">money today</span>
+      {/* ============ CTA — Dark ============ */}
+      <section className="bg-[#0f0f0f] py-28 sm:py-36 px-5 sm:px-8 relative text-center">
+        <svg className="absolute top-0 left-0 w-full -translate-y-[1px]" viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
+          <path d="M0 0L1440 0V30C1200 60 240 60 0 30V0Z" fill="white" />
+        </svg>
+
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#A3FF3C]/[0.05] rounded-full blur-[120px]" />
+
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="relative z-10 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+            Start tracking your
+            <br /><span className="italic text-[#A3FF3C]">money today.</span>
           </h2>
-          <p className="mt-4 text-white/40 text-lg">
-            Free to use. No credit card required.
-          </p>
-          <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }} className="mt-8 inline-block">
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 bg-[#A3FF3C] text-black font-semibold px-10 py-4 rounded-xl hover:bg-[#8FE635] transition-all text-lg shadow-xl shadow-[#A3FF3C]/20"
-            >
-              Get Started Free
-              <ArrowRight className="h-5 w-5" />
+          <p className="mt-5 text-white/30 text-lg">Free. No credit card. 60 seconds to set up.</p>
+          <div className="mt-10">
+            <Link href="/signup" className="group inline-flex items-center gap-2 bg-[#A3FF3C] text-black font-semibold px-9 py-4 rounded-full hover:bg-[#b4ff5e] transition-all text-lg shadow-[0_0_50px_-12px_rgba(163,255,60,0.4)]">
+              Get started free <ArrowRight className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
-          </motion.div>
+          </div>
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 border-t border-white/5">
+      {/* ============ FOOTER ============ */}
+      <footer className="bg-[#0f0f0f] py-10 px-5 sm:px-8 border-t border-white/[0.04]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-[#A3FF3C]">Masari</span>
-            <span className="text-xs text-white/30">مصاري</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded bg-[#A3FF3C] flex items-center justify-center">
+              <span className="text-black font-black text-[8px]">M</span>
+            </div>
+            <span className="text-sm font-medium text-white">Masari</span>
+            <span className="text-xs text-white/20">مصاري</span>
           </div>
-          <p className="text-xs text-white/30">Your AI-powered personal accountant</p>
+          <p className="text-xs text-white/20">Your AI-powered personal accountant</p>
         </div>
       </footer>
+
+      <style jsx>{`
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }
+        .animate-marquee { animation: marquee 25s linear infinite; }
+      `}</style>
     </div>
   );
 }
