@@ -45,7 +45,14 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="border-border bg-card">
+    <>
+      <div className="mb-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+          Back to home
+        </Link>
+      </div>
+    <Card className="border-border/50 bg-card/80 backdrop-blur-xl shadow-2xl shadow-black/20">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold">
           <span className="text-primary">Masari</span>{" "}
@@ -127,5 +134,6 @@ export default function LoginPage() {
         </CardFooter>
       </form>
     </Card>
+    </>
   );
 }
