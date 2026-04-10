@@ -450,6 +450,59 @@ export type Database = {
           }
         ];
       };
+      debts: {
+        Row: {
+          id: string;
+          user_id: string;
+          direction: string;
+          person_name: string;
+          amount: number;
+          currency: string;
+          reason: string | null;
+          due_date: string | null;
+          status: string;
+          paid_date: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          direction: string;
+          person_name: string;
+          amount: number;
+          currency?: string;
+          reason?: string | null;
+          due_date?: string | null;
+          status?: string;
+          paid_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          direction?: string;
+          person_name?: string;
+          amount?: number;
+          currency?: string;
+          reason?: string | null;
+          due_date?: string | null;
+          status?: string;
+          paid_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "debts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -467,3 +520,4 @@ export type AICategoryOverride = Database["public"]["Tables"]["ai_category_overr
 export type ReportLog = Database["public"]["Tables"]["reports_log"]["Row"];
 export type SavingsGoal = Database["public"]["Tables"]["savings_goals"]["Row"];
 export type SavingsContribution = Database["public"]["Tables"]["savings_contributions"]["Row"];
+export type Debt = Database["public"]["Tables"]["debts"]["Row"];

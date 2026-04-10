@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, Target, PiggyBank } from "lucide-react";
+import { Menu, LayoutDashboard, ArrowLeftRight, Tags, Settings, LogOut, CalendarDays, Target, PiggyBank, Handshake } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ const navItems = [
   { label: "Subscriptions", href: "/dashboard/subscriptions", icon: CalendarDays },
   { label: "Budgets", href: "/dashboard/budgets", icon: Target },
   { label: "Savings", href: "/dashboard/savings", icon: PiggyBank },
+  { label: "Debts", href: "/dashboard/debts", icon: Handshake },
   { label: "Categories", href: "/dashboard/categories", icon: Tags },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
