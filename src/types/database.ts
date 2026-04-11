@@ -503,6 +503,54 @@ export type Database = {
           }
         ];
       };
+      pending_telegram_actions: {
+        Row: {
+          id: string;
+          user_id: string;
+          chat_id: string;
+          action_type: string;
+          payload: Json;
+          suggested_category_id: string | null;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          chat_id: string;
+          action_type: string;
+          payload: Json;
+          suggested_category_id?: string | null;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          chat_id?: string;
+          action_type?: string;
+          payload?: Json;
+          suggested_category_id?: string | null;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pending_telegram_actions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pending_telegram_actions_suggested_category_id_fkey";
+            columns: ["suggested_category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -521,3 +569,4 @@ export type ReportLog = Database["public"]["Tables"]["reports_log"]["Row"];
 export type SavingsGoal = Database["public"]["Tables"]["savings_goals"]["Row"];
 export type SavingsContribution = Database["public"]["Tables"]["savings_contributions"]["Row"];
 export type Debt = Database["public"]["Tables"]["debts"]["Row"];
+export type PendingTelegramAction = Database["public"]["Tables"]["pending_telegram_actions"]["Row"];

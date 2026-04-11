@@ -14,6 +14,56 @@ export async function sendMessage(chatId: string, text: string, parseMode: "HTML
   return res.json();
 }
 
+export async function sendMessageWithInlineKeyboard(
+  chatId: string,
+  text: string,
+  inlineKeyboard: Array<Array<{ text: string; callback_data: string }>>,
+  parseMode: "HTML" | "Markdown" = "HTML"
+) {
+  const res = await fetch(`${BASE_URL}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: parseMode,
+      reply_markup: { inline_keyboard: inlineKeyboard },
+    }),
+  });
+  return res.json();
+}
+
+export async function answerCallbackQuery(callbackQueryId: string, text?: string) {
+  const res = await fetch(`${BASE_URL}/answerCallbackQuery`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      callback_query_id: callbackQueryId,
+      text,
+    }),
+  });
+  return res.json();
+}
+
+export async function editMessageText(
+  chatId: string,
+  messageId: number,
+  text: string,
+  parseMode: "HTML" | "Markdown" = "HTML"
+) {
+  const res = await fetch(`${BASE_URL}/editMessageText`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      text,
+      parse_mode: parseMode,
+    }),
+  });
+  return res.json();
+}
+
 export async function getFileUrl(fileId: string): Promise<string | null> {
   const res = await fetch(`${BASE_URL}/getFile`, {
     method: "POST",
@@ -45,7 +95,7 @@ export async function setWebhook(url: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       url,
-      allowed_updates: ["message"],
+      allowed_updates: ["message", "callback_query"],
     }),
   });
   return res.json();
@@ -88,5 +138,21 @@ export interface TelegramUpdate {
       mime_type?: string;
       file_size?: number;
     };
+  };
+  callback_query?: {
+    id: string;
+    from: {
+      id: number;
+      first_name: string;
+      username?: string;
+    };
+    message?: {
+      message_id: number;
+      chat: {
+        id: number;
+        type: string;
+      };
+    };
+    data?: string;
   };
 }

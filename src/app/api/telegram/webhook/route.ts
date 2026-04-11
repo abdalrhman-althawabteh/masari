@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendMessage, getFileUrl, downloadFileAsBase64, downloadFileAsBuffer, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
+import { sendMessage, sendMessageWithInlineKeyboard, answerCallbackQuery, editMessageText, getFileUrl, downloadFileAsBase64, downloadFileAsBuffer, setWebhook, type TelegramUpdate } from "@/lib/telegram/bot";
 import { transcribeVoice } from "@/lib/telegram/transcribe";
 import { parseMessage, parseReceipt, fuzzyMatch, type ParsedQuery } from "@/lib/telegram/parse";
 import { getApiKey, type AIProvider } from "@/lib/ai/provider";
 import { formatCurrency, convertCurrency, type Currency } from "@/lib/currency";
 import { startOfMonth, endOfMonth, format, addDays, addMonths } from "date-fns";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 
 function createAdminClient() {
   return createClient<Database>(
@@ -17,6 +17,27 @@ function createAdminClient() {
 
 export async function POST(request: Request) {
   const update: TelegramUpdate = await request.json();
+
+  // Handle inline keyboard callback queries (category confirmation)
+  if (update.callback_query) {
+    const cb = update.callback_query;
+    const cbChatId = cb.message?.chat?.id ? String(cb.message.chat.id) : null;
+    const cbMessageId = cb.message?.message_id;
+
+    await answerCallbackQuery(cb.id);
+
+    if (!cbChatId || !cb.data) return NextResponse.json({ ok: true });
+
+    const supabase = createAdminClient();
+
+    try {
+      return await handleCategoryCallback(supabase, cbChatId, cbMessageId || 0, cb.data);
+    } catch (err) {
+      await sendMessage(cbChatId, `Error: ${err instanceof Error ? err.message : "Something went wrong"}`);
+      return NextResponse.json({ ok: true });
+    }
+  }
+
   const message = update.message;
 
   if (!message) return NextResponse.json({ ok: true });
@@ -99,26 +120,29 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: true });
       }
 
-      const category = await findCategory(supabase, profile.id, receipt.category_hint || "", "expense");
-
-      if (!category) {
+      const categories = await getUserCategories(supabase, profile.id, "expense");
+      if (!categories.length) {
         await sendMessage(chatId, "No categories found.");
         return NextResponse.json({ ok: true });
       }
 
-      await supabase.from("transactions").insert({
-        user_id: profile.id,
+      const suggestedCategory = findBestCategory(categories, receipt.category_hint || "");
+      const receiptCurrency = receipt.currency || defaultCurrency;
+      const receiptDescription = `${receipt.store_name || "Receipt"} (scanned)`;
+      const receiptDate = receipt.date || format(new Date(), "yyyy-MM-dd");
+
+      const pendingId = await createPendingAction(supabase, profile.id, chatId, "receipt", {
         type: "expense",
         amount: receipt.total,
-        currency: receipt.currency || defaultCurrency,
-        category_id: category.id,
-        description: `${receipt.store_name || "Receipt"} (scanned)`,
-        date: receipt.date || format(new Date(), "yyyy-MM-dd"),
-        created_via: "telegram",
-      });
+        currency: receiptCurrency,
+        description: receiptDescription,
+        date: receiptDate,
+      }, suggestedCategory.id);
 
-      await sendMessage(chatId,
-        `<b>Receipt logged!</b>\n${receipt.store_name || "Store"}\n${formatCurrency(receipt.total, (receipt.currency || defaultCurrency) as Currency)}\n${category.name}\n${receipt.date || "Today"}`
+      const keyboard = buildCategoryKeyboard(categories, pendingId, suggestedCategory.id);
+      await sendMessageWithInlineKeyboard(chatId,
+        `<b>Confirm expense:</b>\n-${formatCurrency(receipt.total, receiptCurrency as Currency)}\n${receiptDescription}\n\n<b>Category: ${suggestedCategory.name}</b> (tap to change)`,
+        keyboard
       );
     } catch (err) {
       await sendMessage(chatId, `Error: ${err instanceof Error ? err.message : "Unknown"}`);
@@ -262,6 +286,242 @@ async function findCategory(supabase: SupabaseClient, userId: string, hint: stri
   return match || categories[categories.length - 1];
 }
 
+// ============ CATEGORY CONFIRMATION HELPERS ============
+
+async function getUserCategories(supabase: SupabaseClient, userId: string, type: string) {
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("id, name, icon")
+    .eq("user_id", userId)
+    .or(`type.eq.${type},type.eq.both`)
+    .order("sort_order");
+
+  return categories || [];
+}
+
+function findBestCategory(categories: Array<{ id: string; name: string }>, hint: string) {
+  const match = categories.find(
+    (c) => c.name.toLowerCase().includes(hint.toLowerCase())
+  );
+  return match || categories[categories.length - 1];
+}
+
+function buildCategoryKeyboard(
+  categories: Array<{ id: string; name: string; icon?: string | null }>,
+  pendingId: string,
+  suggestedCategoryId: string
+): Array<Array<{ text: string; callback_data: string }>> {
+  const shortPendingId = pendingId.substring(0, 8);
+
+  // Put suggested category first, then the rest, max 8 total
+  const suggested = categories.find((c) => c.id === suggestedCategoryId);
+  const rest = categories.filter((c) => c.id !== suggestedCategoryId);
+  const ordered = suggested ? [suggested, ...rest] : categories;
+  const limited = ordered.slice(0, 8);
+
+  const rows: Array<Array<{ text: string; callback_data: string }>> = [];
+  for (let i = 0; i < limited.length; i += 2) {
+    const row: Array<{ text: string; callback_data: string }> = [];
+    for (let j = i; j < Math.min(i + 2, limited.length); j++) {
+      const cat = limited[j];
+      const prefix = cat.id === suggestedCategoryId ? "\u2705 " : "";
+      const icon = cat.icon ? `${cat.icon} ` : "";
+      row.push({
+        text: `${prefix}${icon}${cat.name}`,
+        callback_data: `c:${shortPendingId}:${cat.id.substring(0, 8)}`,
+      });
+    }
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+async function createPendingAction(
+  supabase: SupabaseClient,
+  userId: string,
+  chatId: string,
+  actionType: string,
+  payload: Record<string, unknown>,
+  suggestedCategoryId: string
+): Promise<string> {
+  // Clean up expired actions opportunistically
+  await supabase
+    .from("pending_telegram_actions")
+    .delete()
+    .lt("expires_at", new Date().toISOString());
+
+  const { data, error } = await supabase
+    .from("pending_telegram_actions")
+    .insert({
+      user_id: userId,
+      chat_id: chatId,
+      action_type: actionType,
+      payload: payload as unknown as Json,
+      suggested_category_id: suggestedCategoryId,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) throw new Error("Failed to create pending action");
+  return data.id;
+}
+
+async function handleCategoryCallback(
+  supabase: SupabaseClient,
+  chatId: string,
+  messageId: number,
+  callbackData: string
+): Promise<NextResponse> {
+  const parts = callbackData.split(":");
+  if (parts.length !== 3 || parts[0] !== "c") {
+    await sendMessage(chatId, "Invalid action.");
+    return NextResponse.json({ ok: true });
+  }
+
+  const [, shortPendingId, shortCategoryId] = parts;
+
+  // Find the pending action by ID prefix
+  const { data: pendingActions } = await supabase
+    .from("pending_telegram_actions")
+    .select("*")
+    .eq("chat_id", chatId)
+    .like("id", `${shortPendingId}%`)
+    .limit(1);
+
+  const pending = pendingActions?.[0];
+
+  if (!pending) {
+    if (messageId) {
+      await editMessageText(chatId, messageId, "This action has expired. Please send your message again.");
+    } else {
+      await sendMessage(chatId, "This action has expired. Please send your message again.");
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // Check expiry
+  if (new Date(pending.expires_at) < new Date()) {
+    await supabase.from("pending_telegram_actions").delete().eq("id", pending.id);
+    if (messageId) {
+      await editMessageText(chatId, messageId, "This action has expired. Please send your message again.");
+    } else {
+      await sendMessage(chatId, "This action has expired. Please send your message again.");
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // Resolve full category ID
+  const { data: userCategories } = await supabase
+    .from("categories")
+    .select("id, name")
+    .eq("user_id", pending.user_id)
+    .like("id", `${shortCategoryId}%`)
+    .limit(1);
+
+  const category = userCategories?.[0];
+  if (!category) {
+    await sendMessage(chatId, "Category not found. Please try again.");
+    return NextResponse.json({ ok: true });
+  }
+
+  // Delete pending action (consume it — prevents double-tap)
+  const { data: deleted } = await supabase
+    .from("pending_telegram_actions")
+    .delete()
+    .eq("id", pending.id)
+    .select("id");
+
+  if (!deleted || deleted.length === 0) {
+    if (messageId) {
+      await editMessageText(chatId, messageId, "Already saved!");
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  const payload = pending.payload as Record<string, unknown>;
+
+  // Execute the actual DB insert based on action type
+  if (pending.action_type === "log_transaction") {
+    const { error } = await supabase.from("transactions").insert({
+      user_id: pending.user_id,
+      type: payload.type as string,
+      amount: payload.amount as number,
+      currency: payload.currency as string,
+      category_id: category.id,
+      description: payload.description as string,
+      source: (payload.source as string) || null,
+      date: payload.date as string,
+      created_via: "telegram",
+    });
+
+    if (error) {
+      await sendMessage(chatId, `Error: ${error.message}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    const sign = payload.type === "income" ? "+" : "-";
+    const label = payload.type === "income" ? "Income" : "Expense";
+    const confirmMsg = `<b>${label} logged!</b>\n${sign}${formatCurrency(payload.amount as number, payload.currency as Currency)}\n${payload.description}\n${category.name}`;
+
+    if (messageId) {
+      await editMessageText(chatId, messageId, confirmMsg);
+    } else {
+      await sendMessage(chatId, confirmMsg);
+    }
+  } else if (pending.action_type === "create_subscription") {
+    const { error } = await supabase.from("subscriptions").insert({
+      user_id: pending.user_id,
+      name: payload.name as string,
+      amount: payload.amount as number,
+      currency: payload.currency as string,
+      category_id: category.id,
+      billing_cycle: payload.billing_cycle as string,
+      next_billing_date: payload.start_date as string,
+      status: "active",
+    });
+
+    if (error) {
+      await sendMessage(chatId, `Error: ${error.message}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    const confirmMsg = `<b>Subscription added!</b>\n${payload.name}\n${formatCurrency(payload.amount as number, payload.currency as Currency)} / ${payload.billing_cycle}\nNext billing: ${payload.start_date}\n${category.name}`;
+
+    if (messageId) {
+      await editMessageText(chatId, messageId, confirmMsg);
+    } else {
+      await sendMessage(chatId, confirmMsg);
+    }
+  } else if (pending.action_type === "receipt") {
+    const { error } = await supabase.from("transactions").insert({
+      user_id: pending.user_id,
+      type: "expense",
+      amount: payload.amount as number,
+      currency: payload.currency as string,
+      category_id: category.id,
+      description: payload.description as string,
+      date: payload.date as string,
+      created_via: "telegram",
+    });
+
+    if (error) {
+      await sendMessage(chatId, `Error: ${error.message}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    const confirmMsg = `<b>Receipt logged!</b>\n${payload.description}\n${formatCurrency(payload.amount as number, payload.currency as Currency)}\n${category.name}\n${payload.date}`;
+
+    if (messageId) {
+      await editMessageText(chatId, messageId, confirmMsg);
+    } else {
+      await sendMessage(chatId, confirmMsg);
+    }
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 function getHelpText(name: string): string {
   return `Hey ${name}! Here's what I can do:\n
 <b>Transactions</b>
@@ -305,20 +565,24 @@ async function handleLogTransaction(supabase: SupabaseClient, chatId: string, pr
   const tx = parsed.transaction;
   if (!tx) { await sendMessage(chatId, "Couldn't understand the transaction. Try: <i>Spent 15 JOD on lunch</i>"); return; }
 
-  const category = await findCategory(supabase, profile.id, tx.category_hint || "", tx.type);
-  if (!category) { await sendMessage(chatId, "No categories found."); return; }
+  const categories = await getUserCategories(supabase, profile.id, tx.type);
+  if (!categories.length) { await sendMessage(chatId, "No categories found."); return; }
 
-  const { error } = await supabase.from("transactions").insert({
-    user_id: profile.id, type: tx.type, amount: tx.amount, currency: tx.currency,
-    category_id: category.id, description: tx.description, source: tx.source || null,
-    date: format(new Date(), "yyyy-MM-dd"), created_via: "telegram",
-  });
+  const suggestedCategory = findBestCategory(categories, tx.category_hint || "");
 
-  if (error) { await sendMessage(chatId, `Error: ${error.message}`); return; }
+  const pendingId = await createPendingAction(supabase, profile.id, chatId, "log_transaction", {
+    type: tx.type, amount: tx.amount, currency: tx.currency,
+    description: tx.description, source: tx.source || null,
+    date: format(new Date(), "yyyy-MM-dd"),
+  }, suggestedCategory.id);
 
   const sign = tx.type === "income" ? "+" : "-";
-  await sendMessage(chatId,
-    `<b>${tx.type === "income" ? "Income" : "Expense"} logged!</b>\n${sign}${formatCurrency(tx.amount, tx.currency as Currency)}\n${tx.description}\n${category.name}`
+  const label = tx.type === "income" ? "income" : "expense";
+  const keyboard = buildCategoryKeyboard(categories, pendingId, suggestedCategory.id);
+
+  await sendMessageWithInlineKeyboard(chatId,
+    `<b>Confirm ${label}:</b>\n${sign}${formatCurrency(tx.amount, tx.currency as Currency)}\n${tx.description}\n\n<b>Category: ${suggestedCategory.name}</b> (tap to change)`,
+    keyboard
   );
 }
 
@@ -372,20 +636,22 @@ async function handleCreateSubscription(supabase: SupabaseClient, chatId: string
   const sub = parsed.subscription;
   if (!sub) { await sendMessage(chatId, "Couldn't understand. Try: <i>Add subscription Netflix $15 monthly</i>"); return; }
 
-  const category = await findCategory(supabase, profile.id, sub.category_hint || "SaaS", "expense");
-  if (!category) { await sendMessage(chatId, "No categories found."); return; }
+  const categories = await getUserCategories(supabase, profile.id, "expense");
+  if (!categories.length) { await sendMessage(chatId, "No categories found."); return; }
 
+  const suggestedCategory = findBestCategory(categories, sub.category_hint || "SaaS");
   const nextDate = sub.start_date || format(addMonths(new Date(), 1), "yyyy-MM-dd");
 
-  const { error } = await supabase.from("subscriptions").insert({
-    user_id: profile.id, name: sub.name, amount: sub.amount, currency: sub.currency,
-    category_id: category.id, billing_cycle: sub.billing_cycle, next_billing_date: nextDate, status: "active",
-  });
+  const pendingId = await createPendingAction(supabase, profile.id, chatId, "create_subscription", {
+    name: sub.name, amount: sub.amount, currency: sub.currency,
+    billing_cycle: sub.billing_cycle, start_date: nextDate,
+  }, suggestedCategory.id);
 
-  if (error) { await sendMessage(chatId, `Error: ${error.message}`); return; }
+  const keyboard = buildCategoryKeyboard(categories, pendingId, suggestedCategory.id);
 
-  await sendMessage(chatId,
-    `<b>Subscription added!</b>\n${sub.name}\n${formatCurrency(sub.amount, sub.currency as Currency)} / ${sub.billing_cycle}\nNext billing: ${nextDate}`
+  await sendMessageWithInlineKeyboard(chatId,
+    `<b>Confirm subscription:</b>\n${sub.name}\n${formatCurrency(sub.amount, sub.currency as Currency)} / ${sub.billing_cycle}\nNext billing: ${nextDate}\n\n<b>Category: ${suggestedCategory.name}</b> (tap to change)`,
+    keyboard
   );
 }
 
