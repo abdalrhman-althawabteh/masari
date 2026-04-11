@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مصاري — دليل الاستخدام</title>
+<meta name="description" content="دليل سريع لاستخدام تطبيق مصاري — محاسبك الشخصي بالذكاء الاصطناعي">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:#0a0a0a;color:#e0e0e0;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:#A3FF3C;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;background:linear-gradient(180deg,#141414 0%,#0a0a0a 100%);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(163,255,60,0.08) 0%,transparent 70%);pointer-events:none}
+.logo{font-size:48px;font-weight:800;color:#fff;margin-bottom:4px;position:relative}
+.logo span{color:#A3FF3C}
+.logo-ar{font-size:20px;color:#888;margin-bottom:20px;font-weight:400}
+.hero-desc{font-size:17px;color:#aaa;max-width:500px;margin:0 auto 28px;line-height:1.7}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:#A3FF3C;color:#000;font-size:16px;font-weight:700;border-radius:12px;transition:all .2s;border:none;cursor:pointer;text-decoration:none}
+.cta-btn:hover{background:#b4ff5e;transform:translateY(-1px);text-decoration:none}
+.cta-btn svg{width:18px;height:18px}
+.cta-secondary{background:transparent;border:1.5px solid #333;color:#fff;margin-right:10px}
+.cta-secondary:hover{border-color:#A3FF3C;background:rgba(163,255,60,0.05)}
+
+/* Features */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:700px;margin:0 auto 20px;padding:0 20px}
+.feat{background:#151515;border:1px solid #1e1e1e;border-radius:14px;padding:18px 14px;text-align:center;transition:border-color .2s}
+.feat:hover{border-color:#333}
+.feat-icon{margin-bottom:10px;display:flex;justify-content:center}
+.feat-icon svg{width:32px;height:32px;stroke:#A3FF3C;stroke-width:1.5;fill:none}
+.feat-label{font-size:13px;color:#ccc;font-weight:500}
+
+/* Section */
+.section{max-width:700px;margin:0 auto;padding:48px 20px}
+.section-tag{display:inline-block;font-size:11px;font-weight:700;color:#A3FF3C;background:rgba(163,255,60,0.1);padding:4px 12px;border-radius:20px;margin-bottom:12px;letter-spacing:1px}
+.section-title{font-size:26px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.4}
+.section-desc{font-size:15px;color:#888;margin-bottom:28px;line-height:1.7}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:20px}
+.step{display:flex;gap:16px;align-items:flex-start}
+.step-num{min-width:36px;height:36px;background:#A3FF3C;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;margin-top:2px}
+.step-content{flex:1}
+.step-title{font-size:16px;font-weight:600;color:#fff;margin-bottom:4px}
+.step-desc{font-size:14px;color:#999;line-height:1.6}
+
+/* Phone mockup */
+.phone{background:#1a1a1a;border:2px solid #2a2a2a;border-radius:24px;padding:16px;max-width:340px;margin:24px auto;position:relative;overflow:hidden}
+.phone-bar{display:flex;justify-content:center;margin-bottom:12px}
+.phone-bar span{width:60px;height:5px;background:#333;border-radius:10px}
+.phone-screen{background:#111;border-radius:14px;overflow:hidden}
+.mock-header{background:#161616;padding:12px 16px;border-bottom:1px solid #222;display:flex;align-items:center;gap:10px}
+.mock-header .dot{width:8px;height:8px;border-radius:50%;background:#A3FF3C}
+.mock-header span{font-size:13px;color:#888;font-weight:500}
+.mock-body{padding:16px}
+.mock-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1a1a1a;border-radius:10px;margin-bottom:8px}
+.mock-row .emoji{font-size:20px}
+.mock-row .text{flex:1}
+.mock-row .label{font-size:13px;color:#ccc;font-weight:500}
+.mock-row .sublabel{font-size:11px;color:#666}
+.mock-row .amount{font-size:14px;font-weight:700}
+.mock-row .amount.red{color:#FF4444}
+.mock-row .amount.green{color:#A3FF3C}
+
+/* Telegram mockup */
+.tg-chat{background:#0e1621;border-radius:14px;overflow:hidden;max-width:380px;margin:20px auto}
+.tg-top{background:#17212b;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.tg-avatar{width:32px;height:32px;border-radius:50%;background:#A3FF3C;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#000}
+.tg-name{font-size:14px;color:#fff;font-weight:600}
+.tg-msgs{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.tg-msg{max-width:85%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;direction:ltr;text-align:left}
+.tg-msg.user{background:#2b5278;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.tg-msg.bot{background:#182533;color:#ccc;align-self:flex-start;border-bottom-left-radius:4px}
+.tg-msg .highlight{color:#A3FF3C;font-weight:600}
+.tg-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tg-btn{background:#2b5278;color:#6ab2f2;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500}
+
+/* Code block */
+.code-block{background:#161616;border:1px solid #2a2a2a;border-radius:12px;padding:16px 20px;text-align:center;margin:16px 0}
+.code-value{font-size:32px;font-weight:800;letter-spacing:8px;color:#A3FF3C;font-family:monospace;direction:ltr}
+.code-label{font-size:12px;color:#666;margin-top:6px}
+
+/* API cards */
+.api-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0}
+.api-card{background:#151515;border:1px solid #1e1e1e;border-radius:14px;padding:18px;text-align:center;transition:all .2s}
+.api-card:hover{border-color:#333}
+.api-card .icon{font-size:32px;margin-bottom:8px}
+.api-card .name{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+.api-card .desc{font-size:12px;color:#888}
+.api-card.no{opacity:.4;position:relative}
+.api-card.no::after{content:'✕';position:absolute;top:10px;left:10px;color:#FF4444;font-size:18px;font-weight:800}
+
+/* Divider */
+.divider{border:none;border-top:1px solid #1a1a1a;margin:0}
+
+/* Alert box */
+.alert{background:rgba(255,138,0,0.08);border:1px solid rgba(255,138,0,0.2);border-radius:12px;padding:14px 18px;display:flex;gap:10px;align-items:flex-start;margin:16px 0}
+.alert-icon{font-size:20px;min-width:24px}
+.alert-text{font-size:13px;color:#ccc;line-height:1.6}
+
+/* Tip */
+.tip-box{background:rgba(163,255,60,0.06);border:1px solid rgba(163,255,60,0.15);border-radius:12px;padding:14px 18px;display:flex;gap:10px;align-items:flex-start;margin:16px 0}
+.tip-icon{font-size:20px;min-width:24px}
+.tip-text{font-size:13px;color:#ccc;line-height:1.6}
+
+/* Footer */
+.footer{text-align:center;padding:40px 20px 60px;color:#555;font-size:13px}
+.footer a{color:#A3FF3C}
+
+/* Floating CTA */
+.floating-cta{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:100;padding:12px 28px;background:#A3FF3C;color:#000;font-weight:700;font-size:15px;border-radius:50px;box-shadow:0 4px 24px rgba(163,255,60,0.25);text-decoration:none;display:flex;align-items:center;gap:8px;transition:all .2s}
+.floating-cta:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 6px 30px rgba(163,255,60,0.35);text-decoration:none}
+
+/* Commands grid */
+.cmd-grid{display:grid;grid-template-columns:1fr;gap:8px;margin:16px 0}
+.cmd{background:#151515;border:1px solid #1e1e1e;border-radius:10px;padding:12px 16px;display:flex;gap:12px;align-items:center}
+.cmd-emoji{font-size:22px;min-width:30px;text-align:center}
+.cmd-text{flex:1}
+.cmd-example{font-size:13px;color:#A3FF3C;font-family:monospace;direction:ltr;text-align:left;margin-bottom:2px}
+.cmd-desc{font-size:12px;color:#888}
+
+@media(min-width:600px){
+  .hero{padding:80px 20px 50px}
+  .logo{font-size:56px}
+  .cmd-grid{grid-template-columns:1fr 1fr}
+  .features{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="logo"><span>م</span>صاري</div>
+  <div class="logo-ar">Masari — Your AI-Powered Accountant</div>
+  <p class="hero-desc">تطبيق يساعدك تتابع مصاريفك، دخلك، ميزانيتك، اشتراكاتك، وديونك — من المتصفح أو من تيليجرام.</p>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px">
+    <a href="https://www.abdthawabteh.com" class="cta-btn">
+      ابدأ مجاناً
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- Quick features -->
+<div class="features">
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div><div class="feat-label">لوحة تحكم</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M6 12h12l-1.5 8h-9L6 12z"/><circle cx="9" cy="7" r="0.8" fill="#A3FF3C" stroke="none"/><circle cx="15" cy="7" r="0.8" fill="#A3FF3C" stroke="none"/></svg></div><div class="feat-label">ذكاء اصطناعي</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M21 5L12 2 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5z"/><path d="M9.5 11l-2-2L6 10.5l3.5 3.5 6-6L14 6.5l-4.5 4.5z"/></svg></div><div class="feat-label">بوت تيليجرام</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div class="feat-label">رسائل صوتية</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></div><div class="feat-label">مسح فواتير</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><div class="feat-label">ميزانية</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M3 20l4-4m0 0l4-4m-4 4V8"/><path d="M21 20l-4-4m0 0l-4-4m4 4V4"/><circle cx="7" cy="16" r="2" fill="#A3FF3C" stroke="none"/><circle cx="17" cy="16" r="2" fill="#A3FF3C" stroke="none"/></svg></div><div class="feat-label">أهداف ادخار</div></div>
+  <div class="feat"><div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01" stroke-width="2" stroke-linecap="round"/></svg></div><div class="feat-label">موبايل + ويب</div></div>
+</div>
+
+<!-- App Preview -->
+<div class="section">
+  <span class="section-tag">نظرة سريعة</span>
+  <h2 class="section-title">شو بيعمل التطبيق؟</h2>
+  <p class="section-desc">كل شي بتحتاجه لتتابع فلوسك بمكان واحد. سجّل دخولك ومصاريفك، حط ميزانية، تابع اشتراكاتك، وخلّي الذكاء الاصطناعي يساعدك.</p>
+
+  <div class="phone">
+    <div class="phone-bar"><span></span></div>
+    <div class="phone-screen">
+      <div class="mock-header"><div class="dot"></div><span>Dashboard — لوحة التحكم</span></div>
+      <div class="mock-body">
+        <div class="mock-row">
+          <div class="emoji">💵</div>
+          <div class="text"><div class="label">الدخل</div><div class="sublabel">هالشهر</div></div>
+          <div class="amount green">+1,200 JOD</div>
+        </div>
+        <div class="mock-row">
+          <div class="emoji">🛒</div>
+          <div class="text"><div class="label">المصاريف</div><div class="sublabel">هالشهر</div></div>
+          <div class="amount red">-780 JOD</div>
+        </div>
+        <div class="mock-row">
+          <div class="emoji">📊</div>
+          <div class="text"><div class="label">الرصيد</div><div class="sublabel">الباقي</div></div>
+          <div class="amount green">420 JOD</div>
+        </div>
+        <div class="mock-row">
+          <div class="emoji">🎯</div>
+          <div class="text"><div class="label">الميزانية</div><div class="sublabel">78% مستخدم</div></div>
+          <div class="amount" style="color:#FF8A00">780/1000</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Getting Started -->
+<div class="section">
+  <span class="section-tag">البداية</span>
+  <h2 class="section-title">كيف تبدأ؟</h2>
+  <p class="section-desc">بأقل من دقيقة بتكون جاهز.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">سجّل حساب جديد</div>
+        <div class="step-desc">ادخل على التطبيق واعمل حساب بالإيميل والباسوورد. مجاني بالكامل.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">اختار عملتك</div>
+        <div class="step-desc">أول ما تدخل، اختار العملة (دينار أردني أو دولار) وحط سعر الصرف.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">ابدأ سجّل مصاريفك</div>
+        <div class="step-desc">من الموقع أو من بوت تيليجرام — اكتب مثلاً "صرفت 15 دينار غدا" وخلص!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- AI Setup -->
+<div class="section">
+  <span class="section-tag">مهم</span>
+  <h2 class="section-title">إعداد الذكاء الاصطناعي 🤖</h2>
+  <p class="section-desc">عشان التطبيق يقدر يصنّف مصاريفك تلقائياً، يقرأ الفواتير، ويجاوب على أسئلتك — لازم تعطيه مفتاح API من أحد هالمزودين:</p>
+
+  <div class="api-cards">
+    <div class="api-card">
+      <div class="icon">🟢</div>
+      <div class="name">OpenAI</div>
+      <div class="desc">ChatGPT — الأكثر استخداماً</div>
+    </div>
+    <div class="api-card">
+      <div class="icon">🔵</div>
+      <div class="name">Google Gemini</div>
+      <div class="desc">مجاني مع حد يومي</div>
+    </div>
+    <div class="api-card no">
+      <div class="icon">🟠</div>
+      <div class="name">Claude</div>
+      <div class="desc">غير مدعوم حالياً</div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text">
+      <strong>مفتاح Claude / Anthropic ما بيشتغل</strong> مع التطبيق حالياً. استخدم OpenAI أو Google Gemini.
+      <br>أسهل خيار: <strong>Google Gemini</strong> — ممكن تاخد مفتاح مجاني من <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#A3FF3C">Google AI Studio</a>.
+    </div>
+  </div>
+
+  <div class="steps" style="margin-top:20px">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">اطلع مفتاح API</div>
+        <div class="step-desc">
+          روح على <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a> (لـ Gemini) أو <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a> وانسخ المفتاح.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">ادخل على Settings بالتطبيق</div>
+        <div class="step-desc">من القائمة الجانبية، اضغط على <strong>Settings</strong> (الإعدادات).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">اختار المزوّد والصق المفتاح</div>
+        <div class="step-desc">بقسم <strong>AI Assistant</strong>، اختار "Google Gemini" أو "OpenAI"، والصق المفتاح بالحقل، واضغط <strong>Save Settings</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-icon">💡</div>
+    <div class="tip-text">المفتاح محفوظ بحسابك بشكل آمن. ما حدا غيرك بيقدر يستخدمه. وبتقدر تغيّره أو تحذفه بأي وقت.</div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Telegram Setup -->
+<div class="section">
+  <span class="section-tag">تيليجرام</span>
+  <h2 class="section-title">ربط بوت تيليجرام ✈️</h2>
+  <p class="section-desc">سجّل مصاريفك من تيليجرام بدون ما تفتح الموقع! ابعت رسالة نصية أو صوتية أو صورة فاتورة.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">افتح Settings بالتطبيق</div>
+        <div class="step-desc">من القائمة الجانبية، اضغط على <strong>Settings</strong>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">اضغط "Link Telegram"</div>
+        <div class="step-desc">بقسم <strong>Telegram Bot</strong>، اضغط على زر <strong>Link Telegram</strong>. رح يطلعلك كود من 6 أرقام:</div>
+        <div class="code-block">
+          <div class="code-value">4 8 2 9 1 5</div>
+          <div class="code-label">مثال على الكود — انسخ الكود من التطبيق</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">افتح البوت على تيليجرام</div>
+        <div class="step-desc">اضغط على هالرابط عشان تفتح البوت:</div>
+        <a href="https://t.me/masaribot_bot" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#2b5278;color:#fff;padding:10px 20px;border-radius:10px;margin:8px 0;font-size:14px;font-weight:600;text-decoration:none">
+          ✈️ @masaribot_bot — افتح البوت
+        </a>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">ابعت الكود للبوت</div>
+        <div class="step-desc">الصق الكود بالمحادثة مع البوت وابعته. البوت رح يرد عليك:</div>
+        <div class="tg-chat">
+          <div class="tg-top">
+            <div class="tg-avatar">م</div>
+            <div class="tg-name">Masari Bot</div>
+          </div>
+          <div class="tg-msgs">
+            <div class="tg-msg user">482915</div>
+            <div class="tg-msg bot">✅ <span class="highlight">Linked!</span> Welcome, Ahmad!<br><br>You can now log transactions by sending messages like:<br>• "Spent 15 JOD on lunch"<br>• "Earned 500 USD from freelance"<br>• Send a photo of a receipt<br>• Send a voice message</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">خلص! ابدأ استخدم 🎉</div>
+        <div class="step-desc">هلأ بتقدر تبعت رسائل للبوت وبيسجّلها بحسابك تلقائياً.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Telegram Commands -->
+<div class="section">
+  <span class="section-tag">أوامر البوت</span>
+  <h2 class="section-title">شو بتقدر تعمل بالبوت؟</h2>
+  <p class="section-desc">ابعت أي من هالرسائل للبوت وبيفهمك:</p>
+
+  <div class="cmd-grid">
+    <div class="cmd">
+      <div class="cmd-emoji">🛒</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Spent 15 JOD on lunch"</div>
+        <div class="cmd-desc">سجّل مصروف</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">💵</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Earned 500 USD from freelance"</div>
+        <div class="cmd-desc">سجّل دخل</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">💰</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"What's my balance?"</div>
+        <div class="cmd-desc">شوف رصيدك</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">📊</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Set budget 500 JOD"</div>
+        <div class="cmd-desc">حط ميزانية</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">🤔</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Can I spend 200 on shoes?"</div>
+        <div class="cmd-desc">اسأل الذكاء الاصطناعي</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">🧾</div>
+      <div class="cmd-text">
+        <div class="cmd-example">ابعت صورة فاتورة 📸</div>
+        <div class="cmd-desc">مسح فاتورة تلقائي</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">🎤</div>
+      <div class="cmd-text">
+        <div class="cmd-example">ابعت رسالة صوتية 🎙️</div>
+        <div class="cmd-desc">سجّل بصوتك</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">💸</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"I owe Ahmad 50 JOD for dinner"</div>
+        <div class="cmd-desc">سجّل دَين</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">🎯</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Save 1000 for emergency fund"</div>
+        <div class="cmd-desc">أنشئ هدف ادخار</div>
+      </div>
+    </div>
+    <div class="cmd">
+      <div class="cmd-emoji">📋</div>
+      <div class="cmd-text">
+        <div class="cmd-example">"Add subscription Netflix $15"</div>
+        <div class="cmd-desc">أضف اشتراك</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tg-chat" style="margin-top:24px">
+    <div class="tg-top">
+      <div class="tg-avatar">م</div>
+      <div class="tg-name">Masari Bot</div>
+    </div>
+    <div class="tg-msgs">
+      <div class="tg-msg user">Spent 8 JOD on coffee</div>
+      <div class="tg-msg bot">
+        ☕ Got it! I'll log:<br>
+        <strong>8.00 JOD</strong> — coffee<br><br>
+        Pick a category:
+        <div class="tg-buttons">
+          <div class="tg-btn">☕ Food & Drinks</div>
+          <div class="tg-btn">🛒 Groceries</div>
+          <div class="tg-btn">🎉 Entertainment</div>
+          <div class="tg-btn">📦 Other</div>
+        </div>
+      </div>
+      <div class="tg-msg user" style="font-size:11px;color:#6ab2f2">☕ Food & Drinks</div>
+      <div class="tg-msg bot">✅ Logged <strong>8.00 JOD</strong> for coffee under ☕ Food & Drinks</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Voice & Receipt -->
+<div class="section">
+  <span class="section-tag">ميزات إضافية</span>
+  <h2 class="section-title">الرسائل الصوتية ومسح الفواتير</h2>
+
+  <div style="display:grid;grid-template-columns:1fr;gap:24px;margin-top:8px">
+    <div>
+      <h3 style="font-size:18px;color:#fff;margin-bottom:8px">🎤 رسالة صوتية</h3>
+      <p style="font-size:14px;color:#888;margin-bottom:12px">سجّل رسالة صوتية بتيليجرام وقول مثلاً: "صرفت عشرة دنانير على الغدا" — البوت بيفهمك وبيسجّلها.</p>
+      <div class="tg-chat">
+        <div class="tg-top"><div class="tg-avatar">م</div><div class="tg-name">Masari Bot</div></div>
+        <div class="tg-msgs">
+          <div class="tg-msg user">🎤 <em>Voice message (0:03)</em></div>
+          <div class="tg-msg bot">🎧 Listening...<br><br>📝 Heard: "Spent 10 JOD on lunch"<br><br>Processing...</div>
+          <div class="tg-msg bot">☕ Got it! I'll log:<br><strong>10.00 JOD</strong> — lunch
+            <div class="tg-buttons">
+              <div class="tg-btn">🍕 Food & Drinks</div>
+              <div class="tg-btn">📦 Other</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size:18px;color:#fff;margin-bottom:8px">🧾 صورة فاتورة</h3>
+      <p style="font-size:14px;color:#888;margin-bottom:12px">صوّر أي فاتورة وابعتها للبوت. الذكاء الاصطناعي بيقرأها وبيستخرج المبلغ والتفاصيل.</p>
+      <div class="tg-chat">
+        <div class="tg-top"><div class="tg-avatar">م</div><div class="tg-name">Masari Bot</div></div>
+        <div class="tg-msgs">
+          <div class="tg-msg user">📷 <em>Receipt photo</em></div>
+          <div class="tg-msg bot">🧾 Scanning receipt...<br><br>Found:<br>• Store: Carrefour<br>• Total: <strong>23.50 JOD</strong><br>• Date: Apr 11, 2026
+            <div class="tg-buttons">
+              <div class="tg-btn">🛒 Groceries</div>
+              <div class="tg-btn">🏠 Home</div>
+              <div class="tg-btn">📦 Other</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- Final CTA -->
+<div class="section" style="text-align:center;padding-bottom:60px">
+  <h2 class="section-title" style="margin-bottom:16px">جاهز تبدأ؟</h2>
+  <p class="section-desc" style="margin-bottom:24px">مجاني بالكامل. بدون بطاقة ائتمان. سجّل بأقل من دقيقة.</p>
+  <a href="https://www.abdthawabteh.com" class="cta-btn" style="font-size:18px;padding:16px 40px">
+    ابدأ هلأ
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  </a>
+</div>
+
+<div class="footer">
+  صُنع بـ ❤️ بواسطة <a href="https://github.com/abdalrhman-althawabteh" target="_blank">عبدالرحمن الثوابتة</a>
+</div>
+
+<!-- Floating CTA -->
+<a href="https://www.abdthawabteh.com" class="floating-cta">
+  ابدأ مجاناً ←
+</a>
+
+</body>
+</html>

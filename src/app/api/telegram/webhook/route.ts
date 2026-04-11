@@ -16,6 +16,14 @@ function createAdminClient() {
 }
 
 export async function POST(request: Request) {
+  // Verify Telegram webhook secret if configured
+  if (process.env.TELEGRAM_WEBHOOK_SECRET) {
+    const secretHeader = request.headers.get("x-telegram-bot-api-secret-token");
+    if (secretHeader !== process.env.TELEGRAM_WEBHOOK_SECRET) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   const update: TelegramUpdate = await request.json();
 
   // Handle inline keyboard callback queries (category confirmation)

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masari — Testing Checklist</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0f0f; color: #e0e0e0;
+    padding: 16px; padding-bottom: 100px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1 { font-size: 24px; color: #A3FF3C; margin-bottom: 4px; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 20px; }
+  .progress-bar-wrap {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1a1a1a; border-top: 1px solid #2a2a2a;
+    padding: 12px 16px; z-index: 100;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .progress-bar-bg {
+    flex: 1; height: 10px; background: #2a2a2a; border-radius: 5px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: #A3FF3C; border-radius: 5px;
+    transition: width 0.3s ease;
+  }
+  .progress-text { font-size: 14px; color: #A3FF3C; font-weight: 600; white-space: nowrap; min-width: 70px; text-align: right; }
+  .section {
+    background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px;
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 16px; cursor: pointer; display: flex;
+    justify-content: space-between; align-items: center;
+    user-select: none; -webkit-user-select: none;
+  }
+  .section-header:active { background: #222; }
+  .section-title { font-size: 16px; font-weight: 600; }
+  .section-count {
+    font-size: 13px; color: #888; background: #252525;
+    padding: 2px 10px; border-radius: 20px;
+  }
+  .section-count.done { color: #A3FF3C; background: #1a2a10; }
+  .section-body { display: none; padding: 0 16px 12px; }
+  .section.open .section-body { display: block; }
+  .section-header .arrow { color: #666; font-size: 12px; transition: transform 0.2s; margin-right: 8px; }
+  .section.open .arrow { transform: rotate(90deg); }
+  .subsection { font-size: 13px; font-weight: 600; color: #A3FF3C; margin: 12px 0 6px; padding-top: 8px; border-top: 1px solid #222; }
+  .subsection:first-child { border-top: none; margin-top: 4px; }
+  .item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #1f1f1f;
+    cursor: pointer; user-select: none; -webkit-user-select: none;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:active { background: #222; margin: 0 -16px; padding: 8px 16px; }
+  .check {
+    width: 22px; height: 22px; min-width: 22px; border: 2px solid #444;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .item.checked .check { background: #A3FF3C; border-color: #A3FF3C; }
+  .item.checked .check::after { content: '✓'; color: #000; font-size: 14px; font-weight: 700; }
+  .item.checked .label { color: #666; text-decoration: line-through; }
+  .label { font-size: 14px; line-height: 1.5; }
+  .reset-btn {
+    display: block; margin: 20px auto; padding: 10px 24px;
+    background: #2a2a2a; color: #FF4444; border: 1px solid #444;
+    border-radius: 8px; font-size: 14px; cursor: pointer;
+  }
+  .reset-btn:active { background: #3a1a1a; }
+  .tip { font-size: 12px; color: #666; margin: 4px 0 0 32px; }
+  @media (min-width: 700px) {
+    body { max-width: 700px; margin: 0 auto; padding: 32px; padding-bottom: 100px; }
+    h1 { font-size: 28px; }
+    .item:hover { background: #1e1e1e; margin: 0 -16px; padding: 8px 16px; border-radius: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Masari Testing Checklist</h1>
+<p class="subtitle">Test every feature before launch. Your progress is saved automatically.</p>
+
+<div id="app"></div>
+
+<button class="reset-btn" onclick="if(confirm('Reset all checkboxes?')){localStorage.removeItem('masari_test');location.reload()}">Reset All Checkboxes</button>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar"></div></div>
+  <div class="progress-text" id="ptext">0 / 0</div>
+</div>
+
+<script>
+const DATA = [
+  { title: "1. Landing Page", items: [
+    { sub: "Visual & Content" },
+    "Hero section loads with animations",
+    "Logo and navigation bar visible",
+    "'Get started free' button goes to /signup",
+    "'Log in' button goes to /login",
+    "Features section scrolls smoothly",
+    "Telegram chat mockup displays correctly",
+    "Page looks good on mobile (no overflow, no cut-off text)",
+    "Page looks good on desktop (proper layout)",
+  ]},
+  { title: "2. Sign Up", items: [
+    "Navigate to /signup",
+    "Enter name, email, password",
+    "Submit → success message appears",
+    "Try submitting empty form → validation errors show",
+    "Try invalid email → error shows",
+    "'Sign in' link goes to login page",
+    "'Back to home' link goes to landing page",
+  ]},
+  { title: "3. Log In", items: [
+    "Navigate to /login",
+    "Enter email and password from signup",
+    "Submit → redirects to /dashboard",
+    "Try wrong password → error toast shows",
+    "Try non-existent email → error toast shows",
+    "'Sign up' link goes to signup page",
+  ]},
+  { title: "4. Onboarding (First-Time User)", items: [
+    "Onboarding modal appears on first dashboard visit",
+    "Step 1: Choose currency (USD or JOD)",
+    "Step 1: Set exchange rate",
+    "Step 2: Set a monthly budget (or skip)",
+    "Step 3: Add first transaction (or skip)",
+    "Progress dots show current step",
+    "'Skip' button works at every step",
+    "Completion animation plays → redirects to dashboard",
+    "Refresh page → onboarding does NOT appear again",
+  ]},
+  { title: "5. Dashboard", items: [
+    { sub: "Summary Cards" },
+    "Income card shows correct amount",
+    "Expenses card shows correct amount",
+    "Balance card shows income - expenses",
+    "Currency matches your setting (USD or JOD)",
+    { sub: "Spending Chart" },
+    "Chart loads with data",
+    "Switch between Weekly / Monthly / Yearly views",
+    "Hover on chart shows tooltip with data",
+    { sub: "Budget Progress" },
+    "Budget bar shows if you set a budget",
+    "Color changes: green (ok) → yellow (80%) → red (100%+)",
+    "'Details' link goes to budgets page",
+    { sub: "Category Breakdown" },
+    "Pie/bar chart shows spending by category",
+    "Category names and icons display correctly",
+    { sub: "Recent Transactions" },
+    "Shows your latest transactions",
+    "Income in green, expenses in red",
+    "Amounts and dates formatted correctly",
+    { sub: "Upcoming Subscriptions" },
+    "Shows subscriptions due in next 7 days",
+    "'View all' link goes to subscriptions page",
+    { sub: "Can I Spend This?" },
+    "Enter an amount and description",
+    "Click 'Ask AI' → loading state appears",
+    "AI advice appears with green/yellow/red indicator",
+    "Works with Enter key too",
+    "Shows error if no AI API key configured",
+  ]},
+  { title: "6. Transactions", items: [
+    { sub: "Add Transaction" },
+    "Click 'Add' button (or press N on desktop)",
+    "Toggle between Expense and Income",
+    "Enter amount → validates > 0",
+    "Enter description → AI category suggestion appears after typing",
+    "Accept AI suggestion → category auto-fills",
+    "Override AI suggestion → pick different category",
+    "Pick a date using calendar",
+    "Select currency",
+    "Submit → success toast → dialog closes",
+    "Transaction appears in the list",
+    { sub: "Transaction List" },
+    "All transactions display with icon, description, amount, date",
+    "Income shows green amount with +",
+    "Expenses show red amount with -",
+    "Search box filters by description",
+    "Type filter works (All / Expenses / Income)",
+    { sub: "Edit Transaction" },
+    "Click edit (pencil) icon on a transaction",
+    "Dialog opens with pre-filled data",
+    "Change amount and description",
+    "Submit → success toast → list updates",
+    { sub: "Delete Transaction" },
+    "Click delete (trash) icon on a transaction",
+    "Confirmation dialog appears",
+    "Click Cancel → nothing happens",
+    "Click Delete → transaction removed → success toast",
+    { sub: "Empty State" },
+    "Delete all transactions → 'No transactions' message shows",
+  ]},
+  { title: "7. Categories", items: [
+    { sub: "Add Category" },
+    "Click 'Add Category' button",
+    "Enter name and emoji icon",
+    "Select type (Expense / Income / Both)",
+    "Submit → category appears in list",
+    { sub: "Category List" },
+    "Expense categories section shows correctly",
+    "Income categories section shows correctly",
+    "Default categories have 'Default' badge",
+    "Default categories cannot be edited or deleted",
+    { sub: "Edit Category" },
+    "Click edit on a custom category",
+    "Change name and icon → submit → list updates",
+    { sub: "Delete Category" },
+    "Click delete on a custom category",
+    "Confirmation appears → delete → removed from list",
+  ]},
+  { title: "8. Budgets", items: [
+    { sub: "Set Budget" },
+    "Click 'Set Budget' button",
+    "Choose 'Overall' for total monthly limit",
+    "Enter amount and select currency",
+    "Submit → budget card appears",
+    "Set another budget for a specific category",
+    { sub: "Budget Display" },
+    "Progress bar shows percentage used",
+    "Green when under 80%, yellow 80-99%, red 100%+",
+    "Shows 'spent / limit' amounts",
+    { sub: "Edit Budget" },
+    "Click edit → change amount → submit → updates",
+    { sub: "Delete Budget" },
+    "Click delete → confirm → removed",
+  ]},
+  { title: "9. Subscriptions", items: [
+    { sub: "Add Subscription" },
+    "Click 'Add' button",
+    "Enter name (e.g. Netflix)",
+    "Enter amount and currency",
+    "Select category",
+    "Choose billing cycle (monthly/yearly/weekly)",
+    "Set next billing date",
+    "Submit → subscription appears in Active section",
+    { sub: "Subscription Display" },
+    "Summary cards show: active count, monthly cost, yearly cost",
+    "Each subscription shows name, amount, next date, days until renewal",
+    "Status badge shows (Active / Paused / Cancelled)",
+    { sub: "Edit Subscription" },
+    "Click edit → change amount or cycle → submit → updates",
+    { sub: "Delete Subscription" },
+    "Click delete → confirm → removed",
+    { sub: "Sections" },
+    "Active section shows active subscriptions",
+    "If you edit status to Paused → moves to Paused section",
+    "If you edit status to Cancelled → moves to Cancelled section",
+  ]},
+  { title: "10. Savings Goals", items: [
+    { sub: "Create Goal" },
+    "Click 'New Goal' button",
+    "Enter goal name (e.g. Emergency Fund)",
+    "Enter target amount and currency",
+    "Optionally set a deadline",
+    "Submit → goal appears with 0% progress",
+    { sub: "Contribute to Goal" },
+    "Click 'Add' button on an active goal",
+    "Enter contribution amount",
+    "Optionally add a note",
+    "Submit → progress bar updates",
+    "If goal reaches 100% → completion message shows",
+    { sub: "Goal Display" },
+    "Summary cards show: active count, completed count, total saved",
+    "Progress bar shows percentage",
+    "Shows current / target amounts",
+    { sub: "Edit & Delete" },
+    "Edit goal → change name or target → submit → updates",
+    "Delete goal → confirm → removed",
+  ]},
+  { title: "11. Debts", items: [
+    { sub: "Add Debt" },
+    "Click 'Add Debt' button",
+    "Toggle: 'I Owe' or 'Someone Owes Me'",
+    "Enter person name",
+    "Enter amount and currency",
+    "Optionally add reason and due date",
+    "Submit → debt appears in correct section",
+    { sub: "Debt Display" },
+    "Summary cards show: I Owe total, Owed to Me total, Net",
+    "'I Owe' section shows your debts (red)",
+    "'Owed to Me' section shows debts owed to you (green)",
+    "Overdue badge appears when past due date",
+    { sub: "Pay Debt" },
+    "Click 'Pay' button on a debt",
+    "Confirmation dialog appears",
+    "Confirm → debt moves to Paid section",
+    "An expense transaction is created automatically",
+    { sub: "Edit & Delete" },
+    "Edit debt → change amount → submit → updates",
+    "Delete debt → confirm → removed",
+  ]},
+  { title: "12. Settings", items: [
+    { sub: "Profile" },
+    "Name field shows your name → change it → save → success toast",
+    "Email field is read-only",
+    { sub: "AI Assistant" },
+    "Select AI provider (OpenAI / Anthropic / Google Gemini)",
+    "Enter your API key",
+    "Eye icon toggles key visibility",
+    "Save → now AI features work (categorization, Can I Spend)",
+    { sub: "Telegram Bot" },
+    "Click 'Link Telegram' → 6-digit code appears",
+    "Copy the code",
+    "Open Telegram → find @masaribot_bot → send the code",
+    "Bot replies: 'Linked! Welcome...'",
+    "Settings page shows 'Telegram linked' status",
+    { sub: "Currency & Timezone" },
+    "Change default currency → save → dashboard updates",
+    "Change exchange rate → save",
+    "Change timezone → save",
+    { sub: "Data Export" },
+    "Click 'Export Transactions as CSV'",
+    "CSV file downloads with your transactions",
+    "Open CSV → verify data looks correct",
+    { sub: "Sign Out" },
+    "Click Sign Out in sidebar",
+    "Redirected to login page",
+    "Try accessing /dashboard → redirected to login",
+  ]},
+  { title: "13. Telegram Bot", items: [
+    { sub: "Basic Commands" },
+    "Send /start → bot shows welcome and help",
+    "Send 'Help' → bot shows command list",
+    { sub: "Log Transactions" },
+    "Send 'Spent 15 JOD on lunch' → bot logs expense",
+    "Bot suggests a category with inline buttons",
+    "Tap a category button → confirms and saves",
+    "Send 'Earned 500 USD from freelance' → bot logs income",
+    "Check the app → transactions appear on website too",
+    { sub: "Check Balance" },
+    "Send 'What's my balance?' → bot replies with summary",
+    "Send 'How much did I spend today?' → bot replies",
+    { sub: "Subscriptions via Bot" },
+    "Send 'Add subscription Netflix $15 monthly' → created",
+    "Send 'Show my subscriptions' → lists all",
+    "Send 'Cancel Netflix' → marks as cancelled",
+    { sub: "Budgets via Bot" },
+    "Send 'Set budget 500 JOD' → budget created",
+    "Send 'Check budget' → shows status",
+    { sub: "Debts via Bot" },
+    "Send 'I owe Ahmed 50 JOD for dinner' → debt logged",
+    "Send 'Show my debts' → lists all",
+    "Send 'Paid Ahmed' → marks paid",
+    { sub: "Savings via Bot" },
+    "Send 'Save 1000 USD for emergency fund' → goal created",
+    "Send 'Add 100 USD to emergency fund' → contributes",
+    { sub: "Voice Message" },
+    "Send a voice message saying 'Spent 10 JOD on coffee'",
+    "Bot shows 'Listening...' then transcription",
+    "Transaction is logged from voice",
+    { sub: "Receipt Photo" },
+    "Take a photo of a receipt and send it",
+    "Bot shows 'Scanning receipt...'",
+    "Bot extracts amount and suggests category",
+    "Confirm → transaction created",
+  ]},
+  { title: "14. Mobile Experience", items: [
+    "Open the app on your phone browser",
+    "Landing page looks good (no horizontal scroll)",
+    "Login/signup forms are easy to use on touch",
+    "Dashboard cards stack in single column",
+    "Hamburger menu opens navigation sheet",
+    "All nav links work from mobile menu",
+    "Floating '+' button visible at bottom-right",
+    "Tap '+' → add transaction dialog opens",
+    "Dialog forms are full-width and easy to fill",
+    "Calendar date picker works on touch",
+    "Swipe/scroll works smoothly everywhere",
+    "Toast notifications visible and not cut off",
+    "All pages load without layout breaking",
+  ]},
+  { title: "15. Error Pages", items: [
+    "Visit a random URL like /asdfgh → custom 404 page shows",
+    "'Go to Dashboard' button works",
+    "'Home' button works",
+    "404 page styled with dark theme (not white default)",
+  ]},
+  { title: "16. Cross-Check Data", items: [
+    "Add a transaction on the website → appears in Telegram balance",
+    "Add a transaction via Telegram → appears on the website",
+    "Set a budget → dashboard progress bar updates",
+    "Add expenses → budget percentage increases",
+    "Delete a transaction → balance and budget recalculate",
+    "Change currency in settings → all amounts convert",
+    "Export CSV → contains all transactions from both web and Telegram",
+  ]},
+];
+
+let state = JSON.parse(localStorage.getItem('masari_test') || '{}');
+const app = document.getElementById('app');
+
+let totalItems = 0;
+let totalChecked = 0;
+
+DATA.forEach((section, si) => {
+  const div = document.createElement('div');
+  div.className = 'section' + (state['open_' + si] ? ' open' : '');
+
+  const items = section.items.filter(i => typeof i === 'string');
+  const checked = items.filter((_, ii) => state[si + '_' + ii]).length;
+  totalItems += items.length;
+  totalChecked += checked;
+
+  const allDone = checked === items.length && items.length > 0;
+
+  div.innerHTML = `
+    <div class="section-header">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="arrow">▶</span>
+        <span class="section-title">${section.title}</span>
+      </div>
+      <span class="section-count ${allDone ? 'done' : ''}">${checked} / ${items.length}</span>
+    </div>
+    <div class="section-body"></div>
+  `;
+
+  const header = div.querySelector('.section-header');
+  const body = div.querySelector('.section-body');
+
+  header.addEventListener('click', () => {
+    div.classList.toggle('open');
+    state['open_' + si] = div.classList.contains('open');
+    save();
+  });
+
+  let itemIndex = 0;
+  section.items.forEach(item => {
+    if (typeof item === 'object' && item.sub) {
+      const s = document.createElement('div');
+      s.className = 'subsection';
+      s.textContent = item.sub;
+      body.appendChild(s);
+      return;
+    }
+
+    const ii = itemIndex++;
+    const row = document.createElement('div');
+    row.className = 'item' + (state[si + '_' + ii] ? ' checked' : '');
+    row.innerHTML = `<div class="check"></div><div class="label">${item}</div>`;
+    row.addEventListener('click', () => {
+      const key = si + '_' + ii;
+      state[key] = !state[key];
+      row.classList.toggle('checked');
+      save();
+      updateProgress();
+      updateSectionCount(div, si);
+    });
+    body.appendChild(row);
+  });
+
+  app.appendChild(div);
+});
+
+function updateSectionCount(div, si) {
+  const items = DATA[si].items.filter(i => typeof i === 'string');
+  const checked = items.filter((_, ii) => state[si + '_' + ii]).length;
+  const span = div.querySelector('.section-count');
+  span.textContent = checked + ' / ' + items.length;
+  if (checked === items.length && items.length > 0) span.classList.add('done');
+  else span.classList.remove('done');
+}
+
+function updateProgress() {
+  let t = 0, c = 0;
+  DATA.forEach((section, si) => {
+    const items = section.items.filter(i => typeof i === 'string');
+    t += items.length;
+    c += items.filter((_, ii) => state[si + '_' + ii]).length;
+  });
+  const pct = t > 0 ? Math.round((c / t) * 100) : 0;
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('ptext').textContent = c + ' / ' + t + ' (' + pct + '%)';
+}
+
+function save() { localStorage.setItem('masari_test', JSON.stringify(state)); }
+
+updateProgress();
+</script>
+</body>
+</html>

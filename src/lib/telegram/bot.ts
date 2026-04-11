@@ -90,13 +90,17 @@ export async function downloadFileAsBuffer(fileUrl: string): Promise<Buffer> {
 }
 
 export async function setWebhook(url: string) {
+  const body: Record<string, unknown> = {
+    url,
+    allowed_updates: ["message", "callback_query"],
+  };
+  if (process.env.TELEGRAM_WEBHOOK_SECRET) {
+    body.secret_token = process.env.TELEGRAM_WEBHOOK_SECRET;
+  }
   const res = await fetch(`${BASE_URL}/setWebhook`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      url,
-      allowed_updates: ["message", "callback_query"],
-    }),
+    body: JSON.stringify(body),
   });
   return res.json();
 }
