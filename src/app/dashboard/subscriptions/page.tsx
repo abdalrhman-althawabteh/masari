@@ -38,6 +38,7 @@ export default function SubscriptionsPage() {
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSub, setEditingSub] = useState<SubscriptionWithCategory | undefined>();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
   const [exchangeRate, setExchangeRate] = useState(0.709);
 
@@ -98,15 +99,16 @@ export default function SubscriptionsPage() {
     setSaving(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this subscription?")) return;
-    const res = await fetch(`/api/subscriptions/${id}`, { method: "DELETE" });
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await fetch(`/api/subscriptions/${deleteId}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Subscription deleted");
       fetchSubscriptions();
     } else {
       toast.error("Failed to delete");
     }
+    setDeleteId(null);
   }
 
   function getDaysLabel(dateStr: string) {
@@ -222,7 +224,7 @@ export default function SubscriptionsPage() {
                 getDaysLabel={getDaysLabel}
                 getDaysColor={getDaysColor}
                 onEdit={(s) => { setEditingSub(s); setDialogOpen(true); }}
-                onDelete={handleDelete}
+                onDelete={(id) => setDeleteId(id)}
               />
             )}
             {pausedSubs.length > 0 && (
@@ -234,7 +236,7 @@ export default function SubscriptionsPage() {
                 getDaysLabel={getDaysLabel}
                 getDaysColor={getDaysColor}
                 onEdit={(s) => { setEditingSub(s); setDialogOpen(true); }}
-                onDelete={handleDelete}
+                onDelete={(id) => setDeleteId(id)}
               />
             )}
             {cancelledSubs.length > 0 && (
@@ -246,7 +248,7 @@ export default function SubscriptionsPage() {
                 getDaysLabel={getDaysLabel}
                 getDaysColor={getDaysColor}
                 onEdit={(s) => { setEditingSub(s); setDialogOpen(true); }}
-                onDelete={handleDelete}
+                onDelete={(id) => setDeleteId(id)}
               />
             )}
           </>
@@ -266,6 +268,19 @@ export default function SubscriptionsPage() {
             onCancel={() => setDialogOpen(false)}
             loading={saving}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Subscription</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

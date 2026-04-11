@@ -19,6 +19,7 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | undefined>();
+  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
   const fetchCategories = useCallback(async () => {
     const res = await fetch("/api/categories");
@@ -60,10 +61,10 @@ export default function CategoriesPage() {
     setSaving(false);
   }
 
-  async function handleDelete(category: Category) {
-    if (!confirm(`Delete "${category.name}"?`)) return;
+  async function confirmDelete() {
+    if (!deleteCategory) return;
 
-    const res = await fetch(`/api/categories/${category.id}`, {
+    const res = await fetch(`/api/categories/${deleteCategory.id}`, {
       method: "DELETE",
     });
 
@@ -74,6 +75,7 @@ export default function CategoriesPage() {
       const err = await res.json();
       toast.error(err.error || "Something went wrong");
     }
+    setDeleteCategory(null);
   }
 
   function openCreate() {
@@ -101,14 +103,14 @@ export default function CategoriesPage() {
           categories={expenseCategories}
           loading={loading}
           onEdit={openEdit}
-          onDelete={handleDelete}
+          onDelete={setDeleteCategory}
         />
         <CategorySection
           title="Income Categories"
           categories={incomeCategories}
           loading={loading}
           onEdit={openEdit}
-          onDelete={handleDelete}
+          onDelete={setDeleteCategory}
         />
       </div>
 
@@ -125,6 +127,19 @@ export default function CategoriesPage() {
             onCancel={() => setDialogOpen(false)}
             loading={saving}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteCategory} onOpenChange={(open) => { if (!open) setDeleteCategory(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Category</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Delete &quot;{deleteCategory?.name}&quot;? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteCategory(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
@@ -175,7 +190,7 @@ function CategorySection({
                   )}
                 </div>
                 {!category.is_default && (
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
                       size="icon"

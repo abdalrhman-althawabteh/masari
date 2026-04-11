@@ -36,6 +36,8 @@ export default function DebtsPage() {
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<DebtItem | undefined>();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [payDebt, setPayDebt] = useState<{ id: string; name: string } | null>(null);
   const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
   const [exchangeRate, setExchangeRate] = useState(0.709);
 
@@ -127,9 +129,9 @@ export default function DebtsPage() {
     setSaving(false);
   }
 
-  async function handlePay(id: string, personName: string) {
-    if (!confirm(`Mark debt with ${personName} as paid? This will create a transaction.`)) return;
-    const res = await fetch(`/api/debts/${id}/pay`, { method: "POST" });
+  async function confirmPay() {
+    if (!payDebt) return;
+    const res = await fetch(`/api/debts/${payDebt.id}/pay`, { method: "POST" });
     if (res.ok) {
       toast.success("Debt marked as paid — transaction created");
       fetchDebts();
@@ -137,13 +139,15 @@ export default function DebtsPage() {
       const err = await res.json();
       toast.error(err.error || "Failed");
     }
+    setPayDebt(null);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this debt?")) return;
-    const res = await fetch(`/api/debts/${id}`, { method: "DELETE" });
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await fetch(`/api/debts/${deleteId}`, { method: "DELETE" });
     if (res.ok) { toast.success("Debt deleted"); fetchDebts(); }
     else toast.error("Failed to delete");
+    setDeleteId(null);
   }
 
   function getDueInfo(dueDate: string | null) {
@@ -238,8 +242,8 @@ export default function DebtsPage() {
                 defaultCurrency={defaultCurrency}
                 getDueInfo={getDueInfo}
                 onEdit={openEdit}
-                onPay={handlePay}
-                onDelete={handleDelete}
+                onPay={(id, name) => setPayDebt({ id, name })}
+                onDelete={(id) => setDeleteId(id)}
               />
             )}
 
@@ -252,8 +256,8 @@ export default function DebtsPage() {
                 defaultCurrency={defaultCurrency}
                 getDueInfo={getDueInfo}
                 onEdit={openEdit}
-                onPay={handlePay}
-                onDelete={handleDelete}
+                onPay={(id, name) => setPayDebt({ id, name })}
+                onDelete={(id) => setDeleteId(id)}
               />
             )}
 
@@ -266,8 +270,8 @@ export default function DebtsPage() {
                 defaultCurrency={defaultCurrency}
                 getDueInfo={getDueInfo}
                 onEdit={openEdit}
-                onPay={handlePay}
-                onDelete={handleDelete}
+                onPay={(id, name) => setPayDebt({ id, name })}
+                onDelete={(id) => setDeleteId(id)}
                 isPaidSection
               />
             )}
@@ -347,6 +351,32 @@ export default function DebtsPage() {
               <Button type="submit" disabled={saving}>{saving ? "Saving..." : editingDebt ? "Update" : "Add Debt"}</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Debt</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!payDebt} onOpenChange={(open) => { if (!open) setPayDebt(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Mark as Paid</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Mark debt with {payDebt?.name} as paid? This will create a transaction.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setPayDebt(null)}>Cancel</Button>
+            <Button onClick={confirmPay}>Confirm</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -34,6 +34,7 @@ export default function SavingsPage() {
   const [goalDialog, setGoalDialog] = useState(false);
   const [contribDialog, setContribDialog] = useState<string | null>(null);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | undefined>();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Goal form
   const [goalName, setGoalName] = useState("");
@@ -138,11 +139,12 @@ export default function SavingsPage() {
     setSaving(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this savings goal?")) return;
-    const res = await fetch(`/api/savings-goals/${id}`, { method: "DELETE" });
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await fetch(`/api/savings-goals/${deleteId}`, { method: "DELETE" });
     if (res.ok) { toast.success("Goal deleted"); fetchGoals(); }
     else toast.error("Failed to delete");
+    setDeleteId(null);
   }
 
   function getProjectedDate(goal: SavingsGoal): string | null {
@@ -237,7 +239,7 @@ export default function SavingsPage() {
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(goal)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(goal.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteId(goal.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -341,6 +343,19 @@ export default function SavingsPage() {
               <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Add Contribution"}</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Savings Goal</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

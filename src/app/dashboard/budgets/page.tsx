@@ -45,6 +45,7 @@ export default function BudgetsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetWithSpent | undefined>();
 
@@ -119,15 +120,16 @@ export default function BudgetsPage() {
     setSaving(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Remove this budget?")) return;
-    const res = await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await fetch(`/api/budgets/${deleteId}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Budget removed");
       fetchBudgets();
     } else {
       toast.error("Failed to remove");
     }
+    setDeleteId(null);
   }
 
   function getBarColor(percentage: number) {
@@ -205,7 +207,7 @@ export default function BudgetsPage() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(budget.id)}
+                          onClick={() => setDeleteId(budget.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -312,6 +314,19 @@ export default function BudgetsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Remove Budget</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Remove</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

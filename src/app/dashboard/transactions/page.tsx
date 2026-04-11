@@ -48,6 +48,7 @@ export default function TransactionsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const fetchTransactions = useCallback(async () => {
     const params = new URLSearchParams();
@@ -93,16 +94,16 @@ export default function TransactionsPage() {
     setSaving(false);
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this transaction?")) return;
-
-    const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await fetch(`/api/transactions/${deleteId}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Transaction deleted");
       fetchTransactions();
     } else {
       toast.error("Failed to delete");
     }
+    setDeleteId(null);
   }
 
   return (
@@ -216,7 +217,7 @@ export default function TransactionsPage() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(t.id)}
+                          onClick={() => setDeleteId(t.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -239,7 +240,7 @@ export default function TransactionsPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(t.id)}
+                        onClick={() => setDeleteId(t.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -265,6 +266,19 @@ export default function TransactionsPage() {
             onCancel={() => setDialogOpen(false)}
             loading={saving}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete Transaction</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure? This cannot be undone.</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
