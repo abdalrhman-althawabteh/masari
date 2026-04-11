@@ -311,14 +311,13 @@ function buildCategoryKeyboard(
   pendingId: string,
   suggestedCategoryId: string
 ): Array<Array<{ text: string; callback_data: string }>> {
-  const shortPendingId = pendingId.substring(0, 8);
-
   // Put suggested category first, then the rest, max 8 total
   const suggested = categories.find((c) => c.id === suggestedCategoryId);
   const rest = categories.filter((c) => c.id !== suggestedCategoryId);
   const ordered = suggested ? [suggested, ...rest] : categories;
   const limited = ordered.slice(0, 8);
 
+  // Use full pending UUID (36 chars) + short category (8 chars) = ~47 bytes, under 64-byte limit
   const rows: Array<Array<{ text: string; callback_data: string }>> = [];
   for (let i = 0; i < limited.length; i += 2) {
     const row: Array<{ text: string; callback_data: string }> = [];
@@ -328,7 +327,7 @@ function buildCategoryKeyboard(
       const icon = cat.icon ? `${cat.icon} ` : "";
       row.push({
         text: `${prefix}${icon}${cat.name}`,
-        callback_data: `c:${shortPendingId}:${cat.id.substring(0, 8)}`,
+        callback_data: `c:${pendingId}:${cat.id.substring(0, 8)}`,
       });
     }
     rows.push(row);
@@ -373,20 +372,23 @@ async function handleCategoryCallback(
   messageId: number,
   callbackData: string
 ): Promise<NextResponse> {
-  const parts = callbackData.split(":");
-  if (parts.length !== 3 || parts[0] !== "c") {
+  // Format: c:{full-pending-uuid}:{8-char-category-id}
+  const firstColon = callbackData.indexOf(":");
+  const lastColon = callbackData.lastIndexOf(":");
+  if (firstColon === -1 || lastColon === firstColon || callbackData[0] !== "c") {
     await sendMessage(chatId, "Invalid action.");
     return NextResponse.json({ ok: true });
   }
 
-  const [, shortPendingId, shortCategoryId] = parts;
+  const pendingId = callbackData.substring(firstColon + 1, lastColon);
+  const shortCategoryId = callbackData.substring(lastColon + 1);
 
-  // Find the pending action by ID prefix
+  // Find the pending action by exact UUID match
   const { data: pendingActions } = await supabase
     .from("pending_telegram_actions")
     .select("*")
+    .eq("id", pendingId)
     .eq("chat_id", chatId)
-    .like("id", `${shortPendingId}%`)
     .limit(1);
 
   const pending = pendingActions?.[0];
@@ -411,15 +413,13 @@ async function handleCategoryCallback(
     return NextResponse.json({ ok: true });
   }
 
-  // Resolve full category ID
+  // Resolve full category ID from short prefix
   const { data: userCategories } = await supabase
     .from("categories")
     .select("id, name")
-    .eq("user_id", pending.user_id)
-    .like("id", `${shortCategoryId}%`)
-    .limit(1);
+    .eq("user_id", pending.user_id);
 
-  const category = userCategories?.[0];
+  const category = userCategories?.find((c) => c.id.startsWith(shortCategoryId));
   if (!category) {
     await sendMessage(chatId, "Category not found. Please try again.");
     return NextResponse.json({ ok: true });
