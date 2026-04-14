@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Topbar } from "@/components/layout/topbar";
-import { formatCurrency, type Currency } from "@/lib/currency";
+import { formatCurrency, getUserCurrencies, type Currency } from "@/lib/currency";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ export default function SavingsPage() {
   const [contribAmount, setContribAmount] = useState("");
   const [contribCurrency, setContribCurrency] = useState("USD");
   const [contribNotes, setContribNotes] = useState("");
+  const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
 
   const fetchGoals = useCallback(async () => {
     const res = await fetch("/api/savings-goals");
@@ -53,7 +54,12 @@ export default function SavingsPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchGoals(); }, [fetchGoals]);
+  useEffect(() => {
+    fetchGoals();
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.default_currency) { setDefaultCurrency(d.default_currency as Currency); setGoalCurrency(d.default_currency); setContribCurrency(d.default_currency); }
+    }).catch(() => {});
+  }, [fetchGoals]);
 
   const activeGoals = goals.filter((g) => g.status === "active");
   const completedGoals = goals.filter((g) => g.status === "completed");
@@ -292,11 +298,12 @@ export default function SavingsPage() {
               </div>
               <div className="w-24 space-y-2">
                 <Label>Currency</Label>
-                <Select value={goalCurrency} onValueChange={(val) => setGoalCurrency(val as string)}>
+                <Select value={goalCurrency} onValueChange={(val) => val && setGoalCurrency(val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="JOD">JOD</SelectItem>
+                    {getUserCurrencies(defaultCurrency).map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -325,11 +332,12 @@ export default function SavingsPage() {
               </div>
               <div className="w-24 space-y-2">
                 <Label>Currency</Label>
-                <Select value={contribCurrency} onValueChange={(val) => setContribCurrency(val as string)}>
+                <Select value={contribCurrency} onValueChange={(val) => val && setContribCurrency(val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="JOD">JOD</SelectItem>
+                    {getUserCurrencies(defaultCurrency).map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

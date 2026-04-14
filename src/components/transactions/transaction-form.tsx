@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon, Sparkles, Loader2 } from "lucide-react";
 import { transactionSchema, type TransactionInput } from "@/lib/validations/transaction";
+import { CURRENCY_LIST, getUserCurrencies, type Currency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ interface TransactionFormProps {
   onSubmit: (data: TransactionInput) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  defaultCurrency?: Currency;
 }
 
 interface AISuggestion {
@@ -29,7 +31,7 @@ interface AISuggestion {
   source: string;
 }
 
-export function TransactionForm({ transaction, onSubmit, onCancel, loading }: TransactionFormProps) {
+export function TransactionForm({ transaction, onSubmit, onCancel, loading, defaultCurrency = "USD" }: TransactionFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null);
@@ -48,7 +50,7 @@ export function TransactionForm({ transaction, onSubmit, onCancel, loading }: Tr
     defaultValues: {
       type: (transaction?.type || "expense") as "income" | "expense",
       amount: transaction?.amount || (undefined as unknown as number),
-      currency: (transaction?.currency || "USD") as "USD" | "JOD",
+      currency: (transaction?.currency || "USD") as Currency,
       category_id: transaction?.category_id || "",
       description: transaction?.description || "",
       source: transaction?.source || "",
@@ -195,11 +197,12 @@ export function TransactionForm({ transaction, onSubmit, onCancel, loading }: Tr
         </div>
         <div className="w-24 space-y-2">
           <Label>Currency</Label>
-          <Select value={currency} onValueChange={(val) => setValue("currency", val as "USD" | "JOD")}>
+          <Select value={currency} onValueChange={(val) => setValue("currency", val as Currency)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="JOD">JOD</SelectItem>
+              {getUserCurrencies(defaultCurrency).map((c) => (
+                <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

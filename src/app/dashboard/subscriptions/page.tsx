@@ -267,6 +267,7 @@ export default function SubscriptionsPage() {
             onSubmit={handleSubmit}
             onCancel={() => setDialogOpen(false)}
             loading={saving}
+            defaultCurrency={defaultCurrency}
           />
         </DialogContent>
       </Dialog>

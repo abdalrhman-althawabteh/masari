@@ -11,6 +11,7 @@ import { CategoryBreakdown } from "@/components/dashboard/category-breakdown";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { CanISpend } from "@/components/dashboard/can-i-spend";
 import { Onboarding } from "@/components/dashboard/onboarding";
+import { WhatsNew } from "@/components/dashboard/whats-new";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,6 +93,7 @@ export default function DashboardPage() {
       <Topbar title="Dashboard" />
 
       <div className="p-4 lg:p-6 space-y-6">
+        <WhatsNew />
         {loading || !data ? (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

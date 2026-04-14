@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CURRENCY_LIST, getDefaultRate, type Currency } from "@/lib/currency";
 import { Sparkles, Eye, EyeOff, MessageCircle, Copy, Unlink, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -285,13 +286,14 @@ export default function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Default Currency</Label>
-              <Select value={defaultCurrency} onValueChange={(val) => setDefaultCurrency(val as string)}>
-                <SelectTrigger className="w-40">
+              <Select value={defaultCurrency} onValueChange={(val) => { if (val) { setDefaultCurrency(val); setExchangeRate(String(getDefaultRate(val as Currency))); } }}>
+                <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USD">USD ($)</SelectItem>
-                  <SelectItem value="JOD">JOD</SelectItem>
+                  {CURRENCY_LIST.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.flag} {c.code}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -300,7 +302,7 @@ export default function SettingsPage() {
             </div>
             <Separator />
             <div className="space-y-2">
-              <Label htmlFor="exchange-rate">Exchange Rate (1 USD = ? JOD)</Label>
+              <Label htmlFor="exchange-rate">{defaultCurrency === "USD" ? "Exchange Rate (not needed for USD)" : `Exchange Rate (1 USD = ? ${defaultCurrency})`}</Label>
               <Input
                 id="exchange-rate"
                 type="number"

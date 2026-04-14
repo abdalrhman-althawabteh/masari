@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Topbar } from "@/components/layout/topbar";
 import { TransactionForm } from "@/components/transactions/transaction-form";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, type Currency } from "@/lib/currency";
 import type { TransactionInput } from "@/lib/validations/transaction";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ interface TransactionWithCategory {
   user_id: string;
   type: "income" | "expense";
   amount: number;
-  currency: "USD" | "JOD";
+  currency: Currency;
   category_id: string;
   description: string;
   source: string | null;
@@ -49,6 +49,13 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.default_currency) setDefaultCurrency(d.default_currency as Currency);
+    }).catch(() => {});
+  }, []);
 
   const fetchTransactions = useCallback(async () => {
     const params = new URLSearchParams();
@@ -265,6 +272,7 @@ export default function TransactionsPage() {
             onSubmit={handleSubmit}
             onCancel={() => setDialogOpen(false)}
             loading={saving}
+            defaultCurrency={defaultCurrency}
           />
         </DialogContent>
       </Dialog>

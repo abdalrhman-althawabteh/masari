@@ -175,5 +175,5 @@ export async function POST(request: Request) {
 }
 
 function fmtText(amount: number, currency: string): string {
-  return currency === "USD" ? `$${amount.toFixed(2)}` : `${amount.toFixed(2)} JOD`;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, minimumFractionDigits: 2 }).format(amount);
 }

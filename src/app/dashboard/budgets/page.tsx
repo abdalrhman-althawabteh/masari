@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Topbar } from "@/components/layout/topbar";
-import { formatCurrency, type Currency } from "@/lib/currency";
+import { formatCurrency, getUserCurrencies, type Currency } from "@/lib/currency";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +53,7 @@ export default function BudgetsPage() {
   const [categoryId, setCategoryId] = useState<string>("overall");
   const [amount, setAmount] = useState("");
   const [budgetCurrency, setBudgetCurrency] = useState("USD");
+  const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
 
   const fetchBudgets = useCallback(async () => {
     const res = await fetch("/api/budgets");
@@ -64,9 +65,10 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     fetchBudgets();
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((cats) => setCategories(cats));
+    fetch("/api/categories").then((res) => res.json()).then((cats) => setCategories(cats));
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.default_currency) { setDefaultCurrency(d.default_currency as Currency); setBudgetCurrency(d.default_currency); }
+    }).catch(() => {});
   }, [fetchBudgets]);
 
   const expenseCategories = categories.filter(
@@ -297,11 +299,12 @@ export default function BudgetsPage() {
               </div>
               <div className="w-24 space-y-2">
                 <Label>Currency</Label>
-                <Select value={budgetCurrency} onValueChange={(val) => setBudgetCurrency(val as string)}>
+                <Select value={budgetCurrency} onValueChange={(val) => val && setBudgetCurrency(val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="JOD">JOD</SelectItem>
+                    {getUserCurrencies(defaultCurrency).map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

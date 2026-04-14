@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const schema = z.object({
   amount: z.number().positive(),
-  currency: z.enum(["USD", "JOD"]),
+  currency: z.enum(["USD", "JOD", "EUR", "GBP", "SAR", "AED", "EGP", "TRY", "IQD", "KWD", "BHD", "OMR", "QAR", "LBP", "SYP", "YER", "MAD", "TND", "DZD", "LYD", "SDG"]),
   description: z.string().min(1).max(500),
 });
 
@@ -54,8 +54,9 @@ export async function POST(request: Request) {
 
   function toDefault(amt: number, cur: string): number {
     if (cur === defaultCurrency) return amt;
-    if (defaultCurrency === "JOD") return amt * exchangeRate;
-    return amt / exchangeRate;
+    if (cur === "USD") return amt * exchangeRate;
+    if (defaultCurrency === "USD") return amt / exchangeRate;
+    return amt; // same currency pass-through
   }
 
   const now = new Date();

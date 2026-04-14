@@ -3,7 +3,7 @@ import { z } from "zod";
 export const subscriptionSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
   amount: z.number().positive("Amount must be greater than 0"),
-  currency: z.enum(["USD", "JOD"]),
+  currency: z.enum(["USD", "JOD", "EUR", "GBP", "SAR", "AED", "EGP", "TRY", "IQD", "KWD", "BHD", "OMR", "QAR", "LBP", "SYP", "YER", "MAD", "TND", "DZD", "LYD", "SDG"]),
   category_id: z.string().uuid("Please select a category"),
   billing_cycle: z.enum(["monthly", "yearly", "weekly", "custom"]),
   billing_day: z.number().min(1).max(31).optional().nullable(),

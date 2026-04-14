@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Loader2, CircleCheck, CircleAlert, CircleX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUserCurrencies, type Currency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,6 +22,13 @@ export function CanISpend() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SpendResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [defaultCurrency, setDefaultCurrency] = useState<Currency>("USD");
+
+  useEffect(() => {
+    fetch("/api/settings").then(r => r.json()).then(d => {
+      if (d.default_currency) { setDefaultCurrency(d.default_currency as Currency); setCurrency(d.default_currency); }
+    }).catch(() => {});
+  }, []);
 
   async function handleAsk() {
     if (!amount || !description) return;
@@ -83,13 +91,14 @@ export function CanISpend() {
             step="0.01"
             min="0.01"
           />
-          <Select value={currency} onValueChange={(val) => setCurrency(val as string)}>
-            <SelectTrigger className="w-20">
+          <Select value={currency} onValueChange={(val) => val && setCurrency(val)}>
+            <SelectTrigger className="w-24">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="JOD">JOD</SelectItem>
+              {getUserCurrencies(defaultCurrency).map((c) => (
+                <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

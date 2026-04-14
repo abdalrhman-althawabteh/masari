@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Topbar } from "@/components/layout/topbar";
-import { formatCurrency, convertCurrency, type Currency } from "@/lib/currency";
+import { formatCurrency, convertCurrency, getUserCurrencies, type Currency } from "@/lib/currency";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -326,11 +326,12 @@ export default function DebtsPage() {
               </div>
               <div className="w-24 space-y-2">
                 <Label>Currency</Label>
-                <Select value={currency} onValueChange={(val) => setCurrency(val as string)}>
+                <Select value={currency} onValueChange={(val) => val && setCurrency(val)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem>
-                    <SelectItem value="JOD">JOD</SelectItem>
+                    {getUserCurrencies(defaultCurrency).map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

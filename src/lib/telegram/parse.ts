@@ -3,7 +3,7 @@ import { chatCompletion, type AIProvider } from "@/lib/ai/provider";
 interface ParsedTransaction {
   type: "income" | "expense";
   amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
   description: string;
   category_hint: string;
   source?: string;
@@ -13,7 +13,7 @@ interface ParsedTransaction {
 interface ParsedSubscription {
   name: string;
   amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
   billing_cycle: "monthly" | "yearly" | "weekly";
   category_hint: string;
   start_date?: string;
@@ -23,27 +23,27 @@ interface ParsedEditSubscription {
   name: string;
   new_name?: string;
   new_amount?: number;
-  new_currency?: "USD" | "JOD";
+  new_currency?: string;
   new_billing_cycle?: "monthly" | "yearly" | "weekly";
   new_start_date?: string;
 }
 
 interface ParsedBudget {
   amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
   category_hint?: string | null;
 }
 
 interface ParsedEditBudget {
   category_hint?: string | null;
   new_amount: number;
-  new_currency?: "USD" | "JOD";
+  new_currency?: string;
 }
 
 interface ParsedSavingsGoal {
   name: string;
   target_amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
   deadline?: string;
 }
 
@@ -57,14 +57,14 @@ interface ParsedEditSavingsGoal {
 interface ParsedContribution {
   goal_name: string;
   amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
 }
 
 interface ParsedDebt {
   direction: "i_owe" | "they_owe";
   person_name: string;
   amount: number;
-  currency: "USD" | "JOD";
+  currency: string;
   reason?: string;
   due_date?: string;
 }
@@ -150,39 +150,39 @@ IMPORTANT RULES:
 INTENTS:
 
 1. LOG TRANSACTION:
-{"intent": "log_transaction", "transaction": {"type": "income"|"expense", "amount": number, "currency": "USD"|"JOD", "description": "...", "category_hint": "...", "source": "client name or null", "date": "YYYY-MM-DD or null"}}
+{"intent": "log_transaction", "transaction": {"type": "income"|"expense", "amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "description": "...", "category_hint": "...", "source": "client name or null", "date": "YYYY-MM-DD or null"}}
 
 2. CREATE SUBSCRIPTION (with optional start_date):
-{"intent": "create_subscription", "subscription": {"name": "...", "amount": number, "currency": "USD"|"JOD", "billing_cycle": "monthly"|"yearly"|"weekly", "category_hint": "...", "start_date": "YYYY-MM-DD or null"}}
+{"intent": "create_subscription", "subscription": {"name": "...", "amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "billing_cycle": "monthly"|"yearly"|"weekly", "category_hint": "...", "start_date": "YYYY-MM-DD or null"}}
 
 3. EDIT SUBSCRIPTION (change name, amount, billing date, etc.):
-{"intent": "edit_subscription", "edit_subscription": {"name": "current name to find", "new_name": "...", "new_amount": number, "new_currency": "USD"|"JOD", "new_billing_cycle": "...", "new_start_date": "YYYY-MM-DD"}}
+{"intent": "edit_subscription", "edit_subscription": {"name": "current name to find", "new_name": "...", "new_amount": number, "new_currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "new_billing_cycle": "...", "new_start_date": "YYYY-MM-DD"}}
 Only include fields that are being changed.
 
 4. LIST SUBSCRIPTIONS: {"intent": "list_subscriptions"}
 5. CANCEL SUBSCRIPTION: {"intent": "cancel_subscription", "cancel_sub": {"name": "..."}}
 
 6. SET BUDGET (category_hint null = overall):
-{"intent": "set_budget", "budget": {"amount": number, "currency": "USD"|"JOD", "category_hint": null|"category name"}}
+{"intent": "set_budget", "budget": {"amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "category_hint": null|"category name"}}
 
 7. EDIT BUDGET:
-{"intent": "edit_budget", "edit_budget": {"category_hint": null|"category name", "new_amount": number, "new_currency": "USD"|"JOD"}}
+{"intent": "edit_budget", "edit_budget": {"category_hint": null|"category name", "new_amount": number, "new_currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG"}}
 
 8. CHECK BUDGET: {"intent": "check_budget"}
 
 9. CREATE SAVINGS GOAL:
-{"intent": "create_savings_goal", "savings_goal": {"name": "...", "target_amount": number, "currency": "USD"|"JOD", "deadline": "YYYY-MM-DD or null"}}
+{"intent": "create_savings_goal", "savings_goal": {"name": "...", "target_amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "deadline": "YYYY-MM-DD or null"}}
 
 10. EDIT SAVINGS GOAL:
 {"intent": "edit_savings_goal", "edit_savings_goal": {"name": "current name to find", "new_name": "...", "new_target_amount": number, "new_deadline": "YYYY-MM-DD"}}
 
 11. CONTRIBUTE TO SAVINGS:
-{"intent": "contribute_savings", "contribution": {"goal_name": "...", "amount": number, "currency": "USD"|"JOD"}}
+{"intent": "contribute_savings", "contribution": {"goal_name": "...", "amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG"}}
 
 12. CHECK SAVINGS: {"intent": "check_savings"}
 
 13. CREATE DEBT (with optional due_date):
-{"intent": "create_debt", "debt": {"direction": "i_owe"|"they_owe", "person_name": "...", "amount": number, "currency": "USD"|"JOD", "reason": "...", "due_date": "YYYY-MM-DD or null"}}
+{"intent": "create_debt", "debt": {"direction": "i_owe"|"they_owe", "person_name": "...", "amount": number, "currency": "USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG", "reason": "...", "due_date": "YYYY-MM-DD or null"}}
 
 14. EDIT DEBT:
 {"intent": "edit_debt", "edit_debt": {"person_name": "...", "new_amount": number, "new_due_date": "YYYY-MM-DD", "new_reason": "..."}}
@@ -263,7 +263,7 @@ async function parseReceiptOpenAI(apiKey: string, imageBase64: string, defaultCu
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-      { role: "system", content: `Extract receipt data. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD","total":number,"category_hint":"..."}. Default currency: ${defaultCurrency}.` },
+      { role: "system", content: `Extract receipt data. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG","total":number,"category_hint":"..."}. Default currency: ${defaultCurrency}.` },
       { role: "user", content: [{ type: "text", text: "Extract:" }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }] },
     ],
     temperature: 0.1, max_tokens: 200,
@@ -276,7 +276,7 @@ async function parseReceiptAnthropic(apiKey: string, imageBase64: string, defaul
     method: "POST", headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514", max_tokens: 200, temperature: 0.1,
-      system: `Extract receipt data. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD","total":number,"category_hint":"..."}. Default currency: ${defaultCurrency}.`,
+      system: `Extract receipt data. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG","total":number,"category_hint":"..."}. Default currency: ${defaultCurrency}.`,
       messages: [{ role: "user", content: [{ type: "text", text: "Extract:" }, { type: "image", source: { type: "base64", media_type: "image/jpeg", data: imageBase64 } }] }],
     }),
   });
@@ -288,7 +288,7 @@ async function parseReceiptGemini(apiKey: string, imageBase64: string, defaultCu
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: `Extract receipt. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD","total":number,"category_hint":"..."}. Default: ${defaultCurrency}.` }, { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] }],
+      contents: [{ role: "user", parts: [{ text: `Extract receipt. ONLY JSON: {"store_name":"...","date":"YYYY-MM-DD","currency":"USD"|"JOD"|"EUR"|"GBP"|"SAR"|"AED"|"EGP"|"TRY"|"IQD"|"KWD"|"BHD"|"OMR"|"QAR"|"LBP"|"SYP"|"YER"|"MAD"|"TND"|"DZD"|"LYD"|"SDG","total":number,"category_hint":"..."}. Default: ${defaultCurrency}.` }, { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }] }],
       generationConfig: { temperature: 0.1, maxOutputTokens: 200 },
     }),
   });

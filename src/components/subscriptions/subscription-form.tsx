@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { subscriptionSchema, type SubscriptionInput } from "@/lib/validations/subscription";
+import { getUserCurrencies, type Currency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,9 +21,10 @@ interface SubscriptionFormProps {
   onSubmit: (data: SubscriptionInput) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  defaultCurrency?: Currency;
 }
 
-export function SubscriptionForm({ subscription, onSubmit, onCancel, loading }: SubscriptionFormProps) {
+export function SubscriptionForm({ subscription, onSubmit, onCancel, loading, defaultCurrency = "USD" }: SubscriptionFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -37,7 +39,7 @@ export function SubscriptionForm({ subscription, onSubmit, onCancel, loading }: 
     defaultValues: {
       name: subscription?.name || "",
       amount: subscription?.amount || (undefined as unknown as number),
-      currency: (subscription?.currency || "USD") as "USD" | "JOD",
+      currency: (subscription?.currency || "USD") as Currency,
       category_id: subscription?.category_id || "",
       billing_cycle: (subscription?.billing_cycle || "monthly") as "monthly" | "yearly" | "weekly" | "custom",
       billing_day: subscription?.billing_day || null,
@@ -91,11 +93,12 @@ export function SubscriptionForm({ subscription, onSubmit, onCancel, loading }: 
         </div>
         <div className="w-24 space-y-2">
           <Label>Currency</Label>
-          <Select value={currency} onValueChange={(val) => setValue("currency", val as "USD" | "JOD")}>
+          <Select value={currency} onValueChange={(val) => setValue("currency", val as Currency)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="USD">USD</SelectItem>
-              <SelectItem value="JOD">JOD</SelectItem>
+              {getUserCurrencies(defaultCurrency).map((c) => (
+                <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

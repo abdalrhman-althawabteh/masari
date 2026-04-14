@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CURRENCY_LIST, getDefaultRate, type Currency } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -185,18 +186,19 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               <div className="space-y-4 text-left">
                 <div className="space-y-2">
                   <Label>Default Currency</Label>
-                  <Select value={currency} onValueChange={(val) => setCurrency(val as string)}>
+                  <Select value={currency} onValueChange={(val) => { if (val) { setCurrency(val); setExchangeRate(String(getDefaultRate(val as Currency))); } }}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD ($) — US Dollar</SelectItem>
-                      <SelectItem value="JOD">JOD — Jordanian Dinar</SelectItem>
+                      {CURRENCY_LIST.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{c.flag} {c.code}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Exchange Rate (1 USD = ? JOD)</Label>
+                  <Label>{currency === "USD" ? "Exchange Rate (not needed for USD)" : `Exchange Rate (1 USD = ? ${currency})`}</Label>
                   <Input
                     type="number"
                     step="0.0001"

@@ -75,10 +75,12 @@ export function buildEmailHtml(data: TemplateData): string {
 
 export function formatMoneyHtml(amount: number, currency: string, color?: string): string {
   const colorStyle = color ? `color: ${color};` : "color: #f5f5f5;";
-  const formatted =
-    currency === "USD"
-      ? `$${Math.abs(amount).toFixed(2)}`
-      : `${Math.abs(amount).toFixed(2)} JOD`;
+  const formatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(amount));
   return `<span style="${colorStyle} font-weight: 600;">${formatted}</span>`;
 }
 

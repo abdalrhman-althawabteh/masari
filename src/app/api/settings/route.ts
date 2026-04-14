@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const settingsSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  default_currency: z.enum(["USD", "JOD"]).optional(),
+  default_currency: z.enum(["USD", "JOD", "EUR", "GBP", "SAR", "AED", "EGP", "TRY", "IQD", "KWD", "BHD", "OMR", "QAR", "LBP", "SYP", "YER", "MAD", "TND", "DZD", "LYD", "SDG"]).optional(),
   exchange_rate: z.number().positive().max(1000).optional(),
   timezone: z.string().max(100).optional(),
   ai_provider: z.enum(["openai", "anthropic", "gemini"]).optional(),
